@@ -1,0 +1,353 @@
+/* ------------------------------
+   ゲームページ用 CSS（限定）
+------------------------------- */
+body.game {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+    background: url('../images/piano.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* ゲームページ専用コンテナに赤い枠線を追加 */
+body.game .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+    width: 100%;
+    max-width: 700px;
+
+    border: 17px solid #800020; /* ここで赤い枠線を追加 */
+}
+
+body.game h2 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 3rem;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+}
+
+body.game .difficulty {
+    margin-bottom: 12px;
+}
+
+body.game .difficulty label {
+    font-family: 'Poppins', sans-serif;
+    margin: 0 8px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+body.game .difficulty input[type="radio"] {
+    margin-right: 4px;
+    transform: scale(1.05);
+}
+
+body.game .note-row {
+    margin: 8px 0;
+}
+
+body.game .note-row h3 {
+    font-family: 'Dancing Script', cursive;
+    margin-bottom: 4px;
+    font-size: 1.2rem;
+    text-decoration: none;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}
+
+body.game .note-row button {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    margin: 3px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    transition: all 0.2s ease-in-out;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+}
+
+body.game .note-row button:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+body.game .controls {
+    display: flex;           /* 横並びにする */
+    justify-content: center; /* 中央寄せ */
+    gap: 12px;               /* ボタン間の隙間 */
+}
+
+body.game .controls button {
+    flex: 1;                 /* 横幅を均等に */
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 10px 0;         /* 高さはこのまま */
+    border-radius: 12px;
+    background: linear-gradient(135deg, #800020, #400010);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    transition: all 0.2s ease-in-out;
+}
+
+body.game .controls button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.7);
+}
+
+body.game #score,
+body.game #listen-count {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    margin: 3px 0;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+}
+
+body.game #title {
+    display: none; /* ✅ 初期状態は非表示 */
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, rgba(0,0,0,0.75), rgba(30,30,30,0.9));
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: 3px solid #800020;
+    box-shadow:
+        0 0 18px #cd5c5c,
+        inset 0 0 10px rgba(255,255,255,0.1);
+    text-shadow:
+        0 0 5px rgba(255,255,255,0.4),
+        1px 1px 2px rgba(0,0,0,0.8);
+    margin-top: 6px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* タイトル初期非表示 */
+#title {
+    display: none;
+}
+
+/* ログアウト・マイページボタンスタイル */
+.btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-container button {
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #800020, #400010);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-container button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.7);
+}
+
+/* スタート・ヒント・ルールボタンの横並び */
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;       /* 親コンテナいっぱいに広げる */
+    max-width: 700px;  /* 必要に応じて最大幅 */
+}
+
+.controls button {
+    flex: 1;                /* 横幅均等 */
+    min-width: 150px;       /* ボタン最低幅を指定して広げる */
+    padding: 12px 0;        /* 高さも少し調整 */
+    font-size: 1.2rem;      /* 文字サイズも調整 */
+}
+
+/* 音階ボタンの行間 */
+.note-row {
+    margin-top: 20px;
+}
+
+/* 難易度選択 */
+.difficulty {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    body.game .note-row button,
+    body.game .controls button {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+    }
+
+    body.game h2 {
+        font-size: 2.2rem;
+    }
+
+    body.game #title {
+        font-size: 1.5rem;
+    }
+
+    body.game .note-row h3 {
+        font-size: 1rem;
+    }
+
+    body.game .difficulty label {
+        font-size: 0.9rem;
+    }
+}
+
+/* ==============================
+   共通設定（トップ・ルール用）
+============================== */
+body.top, body.rules {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url('../images/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* ==============================
+   トップページ用 CSS
+============================== */
+.top-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: rgba(0,0,0,0.75);
+    padding: 40px 50px;
+    border-radius: 25px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+    width: 90%;
+    max-width: 700px;
+}
+
+.top-container h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    margin-bottom: 25px;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+}
+
+.top-container form button {
+    display: inline-block;
+    width: 220px;
+    padding: 14px 0;
+    margin: 12px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg,#800020,#400010);
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+.top-container form button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+/* ==============================
+   ルールページ用 CSS
+============================== */
+.rules-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: rgba(0,0,0,0.75);
+    padding: 40px 50px;
+    border-radius: 25px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+    width: 90%;
+    max-width: 700px;
+}
+
+.rules-container h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 6px rgba(0,0,0,0.6);
+}
+
+.rules-container ul {
+    list-style: disc;
+    margin: 20px auto;
+    padding-left: 20px;
+    max-width: 600px;
+    text-align: left;
+    font-size: 1.2rem;
+}
+
+.rules-container .btn {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 28px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg,#800020,#400010);
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    text-decoration: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.rules-container .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.rules-container {
+    text-align: left;      /* ルール本文だけ左揃え */
+    max-width: 600px;      /* 幅を制限して見やすく */
+    margin: 0 auto;        /* 画面中央に配置 */
+}
+
+.rules-container ol {
+    padding-left: 1.2em;   /* 番号の幅を固定 */
+    margin-left: 0;
+    list-style-position: outside;
+}
+
+.rules-container ol li {
+    margin-left: 0;
+    text-indent: 0;        /* 文字を番号の横に揃える */
+}

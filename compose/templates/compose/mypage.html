@@ -1,0 +1,168 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>Pitch Master - マイページ</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Lato', sans-serif;
+            background: url('{% static "images/background.jpg" %}') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .top-container {
+            background-color: rgba(0,0,0,0.75);
+            padding: 30px 20px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 2px 2px 5px #000;
+        }
+
+        select {
+            padding: 8px;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        canvas {
+            margin-top: 20px;
+            border-radius: 12px;
+            background-color: rgba(255,255,255,0.1);
+            width: 100% !important;
+            max-height: 250px;
+            height: auto !important;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #800020, #400010);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 480px) {
+            h2 { font-size: 1.5rem; }
+            button { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="top-container">
+    {% if user.is_authenticated %}
+        <h2>🎵今日の{{ user.username }}さんのスコアグラフ🎵</h2>
+
+        <!-- 日付選択 -->
+        <select id="dateSelect">
+            {% for date in available_dates %}
+                <option value="{{ date }}">{{ date }}</option>
+            {% endfor %}
+        </select>
+
+        <canvas id="scoreChart"></canvas>
+
+        <div class="controls">
+            <a href="{% url 'game' %}"><button>ゲームに戻る</button></a>
+            <form method="post" action="{% url 'logout_view' %}">
+                {% csrf_token %}
+                <button type="submit">ログアウト</button>
+            </form>
+        </div>
+
+        <script>
+            // スコアデータをテンプレートから取得
+            const scoreData = {{ scores_by_date_json|safe }};
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            const dateSelect = document.getElementById('dateSelect');
+            let currentChart = null;
+
+            function renderChart(selectedDate) {
+                const labels = scoreData[selectedDate].labels;
+                const data = scoreData[selectedDate].data;
+
+                // 既存チャートがあれば破棄
+                if (currentChart) currentChart.destroy();
+
+                currentChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'スコア',
+                            data: data,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { stepSize: 10 }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: true }
+                        }
+                    }
+                });
+            }
+
+            // 初期表示は選択中の値
+            renderChart(dateSelect.value);
+
+            // 日付変更時にグラフ更新
+            dateSelect.addEventListener('change', () => {
+                renderChart(dateSelect.value);
+            });
+        </script>
+    {% else %}
+        <p>このページはログインユーザーのみアクセス可能です。</p>
+    {% endif %}
+</div>
+</body>
+</html>
