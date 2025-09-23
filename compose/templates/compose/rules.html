@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pitch Master - Rules</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="rules">
+    <div class="rules-container">
+        <h2>🎵 Pitch Master ルール 🎵</h2>
+
+        <p>このゲームは、音を聴いて正しい音を選ぶ、相対音感トレーニングゲームです。</p>
+
+        <h3>遊び方</h3>
+        <ol>
+            <li>初級・中級・上級の３つから、チャレンジしたいレベルを選択します。</li>
+            <li>🎹スタート🎹 ボタンを押すと音が再生されるので、記憶してください。</li>
+            <li>再生された音を、高音・中音・和音の中から順番にボタンで答えます。</li>
+            <li>間違えた場合は最初の音から押し直します。</li>
+            <li>音は1回のチャレンジにつき最大5回まで 🎧ヒント🎧 ボタンから再生可能です。</li>
+            <li>5回以内に正解できればクリアとなります。</li>
+        </ol>
+
+        <h3>得点</h3>
+        <p>残り再生回数が多いほど高得点になります。</p>
+
+        <a href="{% url 'game' %}" class="btn">ゲームへ</a>
+    </div>
+</body>
+</html>
