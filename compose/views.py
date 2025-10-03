@@ -77,14 +77,9 @@ def logout_view(request):
     return redirect('top')
 
 
-# マイページ（スコア履歴表示・日付選択対応）
+# ログインユーザー専用のマイページ（スコア履歴表示・日付選択対応）
 @login_required
 def mypage_view(request):
-    """
-    ログインユーザー専用のマイページ
-    Scoreテーブルからユーザーのスコア履歴を取得し、
-    Chart.js で日付ごとに表示できるようJSON化してテンプレートに渡す。
-    """
     # 今日の日付
     today = timezone.localdate()
 
