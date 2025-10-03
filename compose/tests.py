@@ -1,3 +1,2 @@
 from django.test import TestCase
-
-# Create your tests here.
+# ここにテストケースを書くことで、モデルやビューが正しく動作しているか確認できる
