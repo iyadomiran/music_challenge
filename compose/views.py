@@ -1,54 +1,57 @@
-from django.shortcuts import render, redirect  # テンプレート表示やリダイレクト用
-from django.contrib.auth.models import User   # ユーザーモデル
+from django.shortcuts import render, redirect  # テンプレート表示・リダイレクト用
+from django.contrib.auth.models import User   # Django標準のユーザーモデル
 from django.contrib.auth import authenticate, login, logout  # 認証用関数
 from django.contrib import messages             # 画面上の通知メッセージ用
 from django.contrib.auth.decorators import login_required  # ログイン必須デコレーター
 from django.http import JsonResponse            # JSONレスポンスを返すため
-from .models import Score                       # 自作のScoreモデル
+from .models import Score, SongPattern          # 自作モデル（スコア・曲パターン）
 from django.utils import timezone               # 日付・時間操作用
 import json                                     # JSON操作用
 
-# トップページ
+# トップページ表示
 def top_view(request):
     # top.htmlを表示
     return render(request, 'compose/top.html')
 
-
-# ゲストプレイ
+# ゲストプレイ（ログインなしでルールページへ）
 def guest_play_view(request):
-    # セッションに「ゲストフラグ」をセット
+    # セッションにゲストフラグをセット
     request.session['guest'] = True
     # ルールページへリダイレクト
     return redirect('rules')
 
-
-# ルールページ
+# ルールページ表示
 def rules(request):
-    # rules.htmlを表示
     return render(request, 'compose/rules.html')
 
-
-# ゲーム画面（既存の compose.html を使用）
+# ゲーム画面表示（DBから曲パターンを取得してテンプレートに渡す）
 def compose_view(request):
-    # ゲーム用の音パターン（必要に応じて変更可能）
-    pattern = ["do", "re", "mi", "fa"]
-    # compose.htmlにパターンを渡して表示
-    return render(request, 'compose/compose.html', {'pattern': pattern})
+    # DBから全曲パターンを取得
+    patterns = SongPattern.objects.all()
 
+    # 難易度別に辞書化
+    song_patterns = {
+        "beginner": [p.pattern for p in patterns.filter(level="beginner")],
+        "intermediate": [p.pattern for p in patterns.filter(level="intermediate")],
+        "advanced": [p.pattern for p in patterns.filter(level="advanced")],
+    }
 
-# 新規登録
+    # compose.htmlに渡す
+    return render(request, 'compose/compose.html', {'song_patterns': song_patterns})
+
+# ユーザー新規登録
 def register_view(request):
     if request.method == 'POST':
-        # フォームからユーザー名とパスワードを取得
+        # フォームから値を取得
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
 
-        # ユーザー名またはパスワードが空ならエラー
+        # 入力チェック
         if not username or not password:
             messages.error(request, "ユーザー名とパスワードを入力してください。")
             return redirect('register')
 
-        # 既に存在するユーザー名ならエラー
+        # ユーザー名の重複チェック
         if User.objects.filter(username=username).exists():
             messages.error(request, "そのユーザー名は既に使われています。")
             return redirect('register')
@@ -57,62 +60,55 @@ def register_view(request):
         user = User.objects.create_user(username=username, password=password)
         user.save()
         messages.success(request, "ユーザー登録が完了しました。ログインしてください。")
-        # 登録後はログインページへ
         return redirect('login')
 
-    # GET時は登録ページを表示
+    # GET時は登録フォームを表示
     return render(request, 'compose/register.html')
 
-
-# ログイン
+# ユーザーログイン
 def login_view(request):
     if request.method == 'POST':
-        # フォームからユーザー名とパスワードを取得
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
 
-        # ユーザー認証
+        # 認証
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            # 認証成功ならログイン処理
+            # 認証成功
             login(request, user)
-            # 成功時はルールページへリダイレクト
             return redirect('rules')
         else:
-            # 認証失敗ならエラーメッセージ
+            # 認証失敗
             messages.error(request, "ユーザー名またはパスワードが間違っています。")
             return redirect('login')
 
-    # GET時はログインページ表示
+    # GET時はログインフォームを表示
     return render(request, 'compose/login.html')
 
-
-# ログアウト
+# ユーザーログアウト
 def logout_view(request):
     # ログアウト処理
     logout(request)
     messages.success(request, "ログアウトしました。")
-    # トップページへリダイレクト
     return redirect('top')
 
-
-# ログインユーザー専用のマイページ（スコア履歴表示・日付選択対応）
+# マイページ（ログインユーザー専用）
 @login_required
 def mypage_view(request):
     # 今日の日付を取得
     today = timezone.localdate()
 
-    # 日付ごとのスコアを辞書にまとめる
+    # ユーザーのスコアを日付順に取得
     scores_by_date = {}
-    qs = Score.objects.filter(user=request.user).order_by('played_at')  # ユーザーのスコアを日付順に取得
+    qs = Score.objects.filter(user=request.user).order_by('played_at')
     for s in qs:
-        date_str = s.played_at.strftime('%Y-%m-%d')  # 日付だけ取り出す
+        date_str = s.played_at.strftime('%Y-%m-%d')
         if date_str not in scores_by_date:
             scores_by_date[date_str] = []
-        scores_by_date[date_str].append(s.score)  # 同じ日付のスコアをリストに追加
+        scores_by_date[date_str].append(s.score)
 
-    # 今日のスコアを取得
+    # 今日のスコア
     today_str = today.strftime('%Y-%m-%d')
     today_scores = scores_by_date.get(today_str, [])
 
@@ -120,15 +116,15 @@ def mypage_view(request):
     latest_score = today_scores[-1] if today_scores else None
     best_score = max([score for scores in scores_by_date.values() for score in scores]) if scores_by_date else None
 
-    # グラフ表示用にJSON形式に変換
+    # JSON形式に変換（グラフ描画用）
     scores_json = {}
     for date, scores in scores_by_date.items():
         scores_json[date] = {
-            "labels": [f"挑戦{i+1}" for i, s in enumerate(scores)],  # 「挑戦1」「挑戦2」などのラベル
+            "labels": [f"挑戦{i+1}" for i, s in enumerate(scores)],
             "data": scores
         }
 
-    # テンプレートに渡すコンテキスト
+    # テンプレートに渡す
     context = {
         'username': request.user.username,
         'available_dates': list(scores_by_date.keys()),
@@ -137,23 +133,20 @@ def mypage_view(request):
         'best_score': best_score,
     }
 
-    # mypage.htmlを表示
     return render(request, 'compose/mypage.html', context)
 
-
-# ゲーム終了時にスコアを保存する
+# ゲーム終了時スコア保存
 @login_required
 def save_score(request):
     if request.method == 'POST':
         try:
-            # フォームからスコアを取得して整数に変換
+            # フォームから送信されたスコアを取得
             score_value = int(request.POST.get('score', 0))
-            # データベースにスコアを保存
+            # データベースに保存
             Score.objects.create(user=request.user, score=score_value)
-            # 成功レスポンス
             return JsonResponse({'status': 'ok'})
         except ValueError:
-            # 数値変換エラー時
             return JsonResponse({'status': 'error', 'message': '無効なスコア'})
-    # POST以外のリクエストはエラー
+
+    # POST以外はエラー
     return JsonResponse({'status': 'error', 'message': 'POSTメソッドのみ許可'})

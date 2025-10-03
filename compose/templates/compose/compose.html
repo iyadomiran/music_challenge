@@ -1,14 +1,14 @@
-{% load static %}
+{% load static %}  <!-- Django の static ファイル（CSSや画像など）を使うために読み込む -->
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Pitch Master</title>
 
-    <!-- フォントの読み込み -->
+    <!-- Google Fonts の読み込み -->
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Dancing+Script:wght@700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     
-    <!-- 外部CSSの読み込み（Djangoのstaticフォルダから） -->
+    <!-- Django の static フォルダから CSS ファイルを読み込む -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body class="game">
@@ -17,22 +17,27 @@
 
         <!-- 難易度を選ぶラジオボタン -->
         <div class="difficulty">
+            <!-- name="level" はラジオボタンをグループ化するため -->
+            <!-- checked は初期値を初級にする -->
             <label><input type="radio" name="level" value="beginner" checked> 初級</label>
             <label><input type="radio" name="level" value="intermediate"> 中級</label>
             <label><input type="radio" name="level" value="advanced"> 上級</label>
         </div>
 
-        <!-- ボタン群（ルール表示・スタート・ヒント） -->
+        <!-- ゲーム操作ボタン -->
         <div class="controls">
-            <!-- DjangoのURLタグでルールページへ移動 -->
+            <!-- Django の URL テンプレートタグでルールページに遷移 -->
             <button id="showRules" onclick="window.location.href='{% url 'rules' %}'">📖 ルール 📖</button>
+            <!-- ゲームスタートボタン -->
             <button id="start">🎹 スタート 🎹</button>
+            <!-- ヒントボタン（正解パターンを聞く） -->
             <button id="listen">🎧 ヒント 🎧</button>
         </div>
 
-        <!-- 高音の鍵盤ボタン -->
+        <!-- 高音の鍵盤 -->
         <div class="note-row">
             <h3> - 高音 - </h3>
+            <!-- data-note 属性に音名を入れて JS から取得できるようにする -->
             <button data-note="do2">ド</button>
             <button data-note="re1">レ</button>
             <button data-note="mi1">ミ</button>
@@ -43,7 +48,7 @@
             <button data-note="do1">ド</button>
         </div>
 
-        <!-- 中音の鍵盤ボタン -->
+        <!-- 中音の鍵盤 -->
         <div class="note-row">
             <h3> - 中音 - </h3>
             <button data-note="do">ド</button>
@@ -55,8 +60,7 @@
             <button data-note="si">シ</button>
         </div>
 
-        <!-- 和音ボタン -->
-        <!-- 和音ボタン -->
+        <!-- 和音のボタン -->
         <div class="note-row">
             <h3> - 和音 - </h3>
             <button data-note="c_low">Cメジャー (ド・ミ・ソ)</button>
@@ -66,79 +70,44 @@
             <button data-note="am_low">Aマイナー (ラ・ド・ミ)</button>
         </div>
 
-        <!-- ゲーム進行に関する情報 -->
+        <!-- ゲーム情報の表示 -->
         <p id="listen-count">🎧ヒント🎧 再生可能回数 残り: 5</p>
         <p id="score">スコア: 0</p>
         <p id="title"></p>
 
-        <!-- ユーザー関連ボタン（ログイン時のみマイページ表示） -->
+        <!-- ユーザー関連ボタン -->
         <div class="btn-container">
             {% if user.is_authenticated %}
+            <!-- ログイン済みならマイページへのボタンを表示 -->
             <a href="{% url 'mypage' %}"><button type="button">マイページ</button></a>
             {% endif %}
-            
-            <!-- ログアウトボタン（常に表示） -->
+            <!-- ログアウト用フォーム -->
             <form method="post" action="{% url 'logout_view' %}">
-                {% csrf_token %}
+                {% csrf_token %}  <!-- CSRF 対策トークンを埋め込む -->
                 <button type="submit">ログアウト</button>
             </form>
         </div>
     </div>
 
+    <!-- Django から JS に正解曲パターンを渡す -->
     <script>
-        // ===== 出題パターンの定義 =====
+        // views.py で context に入れた song_patterns を JS に渡す
+        const songPatterns = {{ song_patterns|safe }}; // safe を使うことで Django が自動エスケープしない
 
-        // 初級: 単音2音 × 10パターン
-        const beginnerPatterns = [
-            ["re", "mi"],
-            ["mi", "so"],
-            ["so", "ra"],
-            ["ra", "si"],
-            ["do", "mi"],
-            ["re", "so"],
-            ["mi", "ra"],
-            ["so", "si"],
-            ["re1", "mi1"],
-            ["mi1", "so1"]
-        ];
+        // 難易度ごとの配列に分ける
+        const beginnerPatterns = songPatterns.beginner || [];
+        const intermediatePatterns = songPatterns.intermediate || [];
+        const advancedPatterns = songPatterns.advanced || [];
 
-        // 中級: 単音4音 × 10パターン
-        const intermediatePatterns = [
-            ["do", "re", "mi", "fa"],
-            ["re", "mi", "so", "ra"],
-            ["mi", "fa", "so", "si"],
-            ["so", "ra", "si", "do1"],
-            ["ra", "si", "do1", "re1"],
-            ["re", "fa", "so", "ra"],
-            ["mi", "so", "ra", "do1"],
-            ["fa", "ra", "si", "re1"],
-            ["so", "si", "do1", "mi1"],
-            ["ra", "do1", "re1", "fa1"]
-        ];
+        // ゲーム進行用変数
+        let correctPattern = []; // 正解パターン
+        let userPattern = [];    // ユーザーが押した音を記録
+        let listenCount = 0;     // ヒントを聞いた回数
+        const maxListen = 5;     // ヒントの最大回数
+        let attempts = 0;        // 試行回数
+        let gameActive = false;  // ゲームが開始されているかのフラグ
 
-        // 上級: 和音・高音混合4音 × 10パターン
-        const advancedPatterns = [
-            ["c_low", "mi", "so", "do1", "re1"],
-            ["g_low", "si", "re1", "so1", "la1"],
-            ["a_low", "do1", "mi1", "la1", "si1"],
-            ["f_low", "ra", "do1", "fa1", "so1"],
-            ["am_low", "do1", "so1", "mi1", "la1"],
-            ["mi1", "so1", "si1", "re1", "do2"],
-            ["fa1", "ra", "do2", "mi1", "so1"],
-            ["so1", "si1", "re1", "mi1", "la1"],
-            ["la1", "do2", "mi1", "so1", "si1"],
-            ["si1", "re1", "fa1", "ra", "do2"]
-        ];
-
-        // ===== ゲーム進行用の変数 =====
-        let correctPattern = [];   // 正解パターン
-        let userPattern = [];      // ユーザー入力した音の配列
-        let listenCount = 0;       // ヒント再生回数
-        const maxListen = 5;       // 最大ヒント回数
-        let attempts = 0;          // 試行回数
-        let gameActive = false;    // ゲーム中かどうか
-
-        // 選択したレベルを取得
+        // 選択された難易度のパターンを返す関数
         function getSelectedLevel() {
             const level = document.querySelector('input[name="level"]:checked').value;
             if(level==="beginner") return beginnerPatterns;
@@ -146,89 +115,88 @@
             if(level==="advanced") return advancedPatterns;
         }
 
-        // ランダムに正解パターンをセット
+        // 正解パターンをランダムに選ぶ
         function setPattern() {
-            const patterns = getSelectedLevel();
+            const patterns = getSelectedLevel(); // 難易度ごとの配列を取得
             correctPattern = patterns[Math.floor(Math.random()*patterns.length)];
         }
 
-        // ボタンが押されたら音を鳴らす
+        // 鍵盤ボタンを押したときの処理
         document.querySelectorAll("button[data-note]").forEach(btn=>{
             btn.addEventListener("click",()=>{
-                if(!gameActive) return; // ゲームが開始されていない場合は無効
-                const note = btn.dataset.note;
-                userPattern.push(note); // 入力記録
-                playSound(note);        // 音を再生
-                checkPattern();         // 正誤判定
+                if(!gameActive) return; // ゲーム開始前は押しても無効
+                const note = btn.dataset.note; // 押したボタンの音を取得
+                userPattern.push(note);       // 配列に追加
+                playSound(note);              // 音を再生
+                checkPattern();               // 正解と比較
             });
         });
 
-        // 音声を再生する関数
+        // 音を再生する関数
         function playSound(note){ 
             new Audio(`/static/sounds/${note}.mp3`).play(); 
         }
 
         // スタートボタン押下時
         document.getElementById("start").addEventListener("click",()=>{
-            gameActive = true;
-            setPattern();       // 出題パターンを決める
-            playPattern();      // 出題を鳴らす
-            listenCount = 1;    // 最初に自動再生した分をカウント
-            attempts = 0;
-            userPattern = [];
+            gameActive = true; // ゲーム開始
+            setPattern();      // 正解パターンをセット
+            playPattern();     // 正解パターンを再生
+            listenCount = 1;   // 初回再生としてカウント
+            attempts = 0;      // 試行回数リセット
+            userPattern = [];  // ユーザーの入力リセット
+            // HTMLに残り回数やスコアを反映
             document.getElementById("listen-count").innerText = "🎧ヒント🎧 残り: " + (maxListen-listenCount);
             document.getElementById("score").innerText = "スコア: 0";
             document.getElementById("title").innerText = "";
             document.getElementById("title").style.display = "none";
         });
 
-        // ヒント再生
+        // ヒントボタン押下時
         document.getElementById("listen").addEventListener("click",()=>{
-            if(!gameActive) return;
-            if(listenCount >= maxListen){ alert("もう聞けません！💦"); return; }
-            playPattern();  // 出題をもう一度鳴らす
-            listenCount++;
+            if(!gameActive) return;           // ゲーム中でなければ無効
+            if(listenCount >= maxListen){     // ヒント回数の上限チェック
+                alert("もう聞けません！💦");
+                return;
+            }
+            playPattern(); // 正解パターンを再生
+            listenCount++; // ヒント回数をカウント
             document.getElementById("listen-count").innerText = "🎧ヒント🎧 残り: " + (maxListen-listenCount);
         });
 
+        // 正解パターンを順番に再生する関数
         function playPattern(){
-            // 1. 基準音を再生
-            const base = new Audio("/static/sounds/do.mp3");
+            const base = new Audio("/static/sounds/do.mp3"); // 最初の音を再生（例として do）
             base.play();
-
-            // 基準音が終わったら…
             base.onended = () => {
-                // 2秒待ってから正解パターンを鳴らす
+                // 2秒待ってから正解パターンを順番に再生
                 setTimeout(()=>{
-                    let i = 0;
-
+                    let i = 0; // 配列のインデックス
                     function playNext(){
-                        if(i < correctPattern.length){
+                        if(i < correctPattern.length){ // まだ再生する音が残っているか
                             const audio = new Audio(`/static/sounds/${correctPattern[i]}.mp3`);
                             audio.play();
-
-                            // 音が終わったら次へ
-                            audio.onended = () => {
-                                i++;
-                                playNext();
+                            // 音が終わったら次の音を再生
+                            audio.onended = () => { 
+                                i++; 
+                                playNext(); 
                             };
                         }
                     }
-
-                    playNext();
+                    playNext(); // 再生開始
                 }, 2000);
             };
         }
 
-        // === ユーザーの入力チェック ===
+        // ユーザーが押した音を正解パターンと比較する関数
         function checkPattern(){
-            const index = userPattern.length-1;
-            if(userPattern[index] === correctPattern[index]){
-                // 全て一致した場合
-                if(userPattern.length === correctPattern.length){
-                    attempts++;
+            const index = userPattern.length-1; // 最新の入力の位置
+            if(userPattern[index] === correctPattern[index]){ // 正しいか
+                if(userPattern.length === correctPattern.length){ // 全部正解した場合
+                    attempts++; // 試行回数をカウント
                     const score = (maxListen - listenCount + 1) * 20; // スコア計算
                     let title = "";
+                    // スコアに応じた称号を設定
                     if(score === 100) title = "👑 王者 !! あなたは音楽の神！";
                     else if(score >= 80) title = "🌟 名人 !! メロディを極めた者！";
                     else if(score >= 60) title = "🏅 上級者 !! よくできました！";
@@ -239,14 +207,14 @@
                     document.getElementById("score").innerText = "スコア: " + score;
                     document.getElementById("title").innerText = title;
                     document.getElementById("title").style.display = "inline-block";
-                    gameActive = false;
+                    gameActive = false; // ゲーム終了
 
-                    // ログインユーザーならスコア保存
                     {% if user.is_authenticated %}
+                    // ユーザーがログイン中ならスコアを保存する
                     fetch("{% url 'save_score' %}", {
                         method: "POST",
-                        headers: {'X-CSRFToken': '{{ csrf_token }}'},
-                        body: new URLSearchParams({'score': score})
+                        headers: {'X-CSRFToken': '{{ csrf_token }}'}, // CSRFトークン
+                        body: new URLSearchParams({'score': score}) // フォーム形式で送信
                     })
                     .then(response => {
                         if(response.ok) alert("スコアが保存されました！");
@@ -258,8 +226,9 @@
             } else {
                 // 間違えた場合
                 attempts++;
-                if(attempts >= maxListen){
+                if(attempts >= maxListen){ // 最大試行回数に達したらゲームオーバー
                     alert("チャレンジ失敗！💦 残念！");
+                    // ゲーム状態をリセット
                     userPattern = [];
                     listenCount = 0;
                     attempts = 0;
@@ -269,8 +238,9 @@
                     document.getElementById("score").innerText = "0";
                     gameActive = false;
                 } else {
+                    // 間違えたがまだ試行可能な場合
                     alert("違うよ！😞 もう一回最初から押そう！");
-                    userPattern = [];
+                    userPattern = []; // 入力をリセット
                 }
             }
         }
