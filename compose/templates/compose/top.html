@@ -1,34 +1,32 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <meta charset="utf-8">
     <title>Pitch Master</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body class="top">
-<div class="top-container">
-    <h2>🎹 ようこそ ! Pitch Masterへ ! 🎹</h2>
 
-    <h3>下記を選択してください。</h3>
+    <div class="top-banner" aria-hidden="true">
+        <img src="{% static 'images/4-animal.png' %}" alt="Four animals banner">
+    </div>
 
-    <!-- 新規登録 -->
-    <form method="post" action="{% url 'register' %}">
-        {% csrf_token %}
-        <button type="submit">新規登録</button>
-    </form>
+    <!-- ボタン横並び -->
+    <div class="top-buttons">
+        <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            <button type="submit">新規登録</button>
+        </form>
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <button type="submit">ログイン</button>
+        </form>
+        <form method="post" action="{% url 'guest_play' %}">
+            {% csrf_token %}
+            <button type="submit">登録せずに遊ぶ</button>
+        </form>
+    </div>
 
-    <!-- ログイン -->
-    <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        <button type="submit">ログイン</button>
-    </form>
-
-    <!-- ゲストで遊ぶ -->
-    <form method="post" action="{% url 'guest_play' %}">
-        {% csrf_token %}
-        <button type="submit">登録せずに遊ぶ</button>
-    </form>
-</div>
 </body>
 </html>

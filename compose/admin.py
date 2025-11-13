@@ -1,10 +1,8 @@
-from django.contrib import admin  # 管理画面用のモジュールを読み込む
-from .models import Score, SongPattern  # 同じアプリ内の Score と SongPattern モデルを読み込む
+from django.contrib import admin
+from .models import Challenge
 
-# Score モデルを管理画面に登録
-# これにより、Django 管理画面から Score を追加・編集・削除できるようになる
-admin.site.register(Score)
-
-# SongPattern モデルを管理画面に登録
-# これにより、Django 管理画面から正解曲パターンを追加・編集・削除できるようになる
-admin.site.register(SongPattern)
+@admin.register(Challenge)
+class ChallengeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'level', 'correct', 'user_answer', 'created_at')
+    list_filter = ('level', 'created_at')
+    search_fields = ('user__username', 'correct', 'user_answer')

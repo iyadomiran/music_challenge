@@ -4,8 +4,8 @@
 body.game {
     margin: 0;
     padding: 0;
-    font-family: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
-    background: url('../images/piano.jpg') no-repeat center center fixed;
+    font-family: 'Noto Serif JP', 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+    background: url('../images/piano.png') no-repeat center center fixed;
     background-size: cover;
     color: #fff;
     display: flex;
@@ -26,14 +26,19 @@ body.game .container {
     box-shadow: 0 8px 25px rgba(0,0,0,0.7);
     width: 100%;
     max-width: 700px;
-
-    border: 17px solid #800020; /* ここで赤い枠線を追加 */
+    border: 17px solid #800020; /* 赤い枠線 */
 }
 
 body.game h2 {
     font-family: 'Dancing Script', cursive;
     font-size: 3rem;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+    margin-bottom: 0px;
+    margin-top: 0px;
+    background: linear-gradient(135deg, #FFD700,#FFEA70,#FFC300,#FFB700,#E6A800);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 body.game .difficulty {
@@ -53,7 +58,7 @@ body.game .difficulty input[type="radio"] {
 }
 
 body.game .note-row {
-    margin: 8px 0;
+    margin: 20px 0 0 0;
 }
 
 body.game .note-row h3 {
@@ -61,9 +66,18 @@ body.game .note-row h3 {
     margin-bottom: 4px;
     font-size: 1.2rem;
     text-decoration: none;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+    color: #ffffff; /* 白文字 */
+
+    /* 強い深緑の影を広くかける */
+    text-shadow:
+        0 0 4px #003d1e,
+        0 0 8px #004d26,
+        0 0 12px #00552e,
+        0 0 20px #007a43,
+        0 0 28px #00a35b;
 }
 
+/* 音階ボタン */
 body.game .note-row button {
     font-family: 'Poppins', sans-serif;
     font-size: 1rem;
@@ -72,8 +86,8 @@ body.game .note-row button {
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.25);
-    color: #fff;
+    background-color: #00552e; /* 深い緑（不透明）*/
+    color: #ffffff;
     transition: all 0.2s ease-in-out;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
 }
@@ -83,18 +97,16 @@ body.game .note-row button:hover {
     transform: scale(1.05);
 }
 
-body.game .controls {
-    display: flex;           /* 横並びにする */
-    justify-content: center; /* 中央寄せ */
-    gap: 12px;               /* ボタン間の隙間 */
-}
-
-body.game .controls button {
-    flex: 1;                 /* 横幅を均等に */
+/* 中音・高音ボタンおよびスタートボタンの統一スタイル */
+body.game .controls button,
+body.game .start-control button {
+    flex: 1;
+    min-width: 150px;
+    max-width: 215px;
+    height: 50px;
     font-family: 'Poppins', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    padding: 10px 0;         /* 高さはこのまま */
     border-radius: 12px;
     background: linear-gradient(135deg, #800020, #400010);
     color: #fff;
@@ -104,11 +116,29 @@ body.game .controls button {
     transition: all 0.2s ease-in-out;
 }
 
-body.game .controls button:hover {
+body.game .controls button:hover,
+body.game .start-control button:hover {
     transform: scale(1.05);
     box-shadow: 0 6px 12px rgba(0,0,0,0.7);
 }
 
+/* 中音・高音ボタン横並び */
+body.game .controls {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+}
+
+/* 問題を聴くボタンのコンテナ調整 */
+body.game .start-control {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    width: 100%;
+    max-width: 700px;
+}
+
+/* スコア・聴取回数 */
 body.game #score,
 body.game #listen-count {
     font-family: 'Poppins', sans-serif;
@@ -117,8 +147,9 @@ body.game #listen-count {
     text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
 }
 
+/* タイトル初期非表示 */
 body.game #title {
-    display: none; /* ✅ 初期状態は非表示 */
+    display: none;
     font-family: 'Playfair Display', serif;
     font-size: 1.3rem;
     font-weight: 700;
@@ -127,22 +158,13 @@ body.game #title {
     padding: 6px 14px;
     border-radius: 10px;
     border: 3px solid #800020;
-    box-shadow:
-        0 0 18px #cd5c5c,
-        inset 0 0 10px rgba(255,255,255,0.1);
-    text-shadow:
-        0 0 5px rgba(255,255,255,0.4),
-        1px 1px 2px rgba(0,0,0,0.8);
+    box-shadow: 0 0 18px #cd5c5c, inset 0 0 10px rgba(255,255,255,0.1);
+    text-shadow: 0 0 5px rgba(255,255,255,0.4), 1px 1px 2px rgba(0,0,0,0.8);
     margin-top: 6px;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* タイトル初期非表示 */
-#title {
-    display: none;
-}
-
-/* ログアウト・マイページボタンスタイル */
+/* ログアウト・マイページボタン */
 .btn-container {
     display: flex;
     justify-content: center;
@@ -168,41 +190,83 @@ body.game #title {
     box-shadow: 0 6px 12px rgba(0,0,0,0.7);
 }
 
-/* スタート・ヒント・ルールボタンの横並び */
-.controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    width: 100%;       /* 親コンテナいっぱいに広げる */
-    max-width: 700px;  /* 必要に応じて最大幅 */
-}
-
-.controls button {
-    flex: 1;                /* 横幅均等 */
-    min-width: 150px;       /* ボタン最低幅を指定して広げる */
-    padding: 12px 0;        /* 高さも少し調整 */
-    font-size: 1.2rem;      /* 文字サイズも調整 */
-}
-
-/* 音階ボタンの行間 */
-.note-row {
-    margin-top: 20px;
-}
-
-/* 難易度選択 */
-.difficulty {
+/* レベル選択 */
+body.game .difficulty {
     margin-top: 20px;
     display: flex;
     justify-content: center;
     gap: 20px;
 }
 
+body.game .difficulty label {
+    white-space: nowrap;
+}
+
+/* ステップ全体を縦並びに */
+.steps-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 50px;
+    margin-top: 20px;
+}
+
+/* 各ステップ行 */
+.step-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    align-self: flex-start;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+/* ステップ番号ボタン */
+.step-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #2F1B00, #7A5C00,#B08D57,#9C7A00,#4A3500);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 6px 14px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.3),    /* 既存の黒い影 */
+        0 0 8px rgba(255, 255, 255, 0.6), /* 内側近くに強い白光 */
+        0 0 18px rgba(255, 255, 255, 0.45), /* 中間の発光 */
+        0 0 28px rgba(255, 255, 255, 0.35);
+    min-width: 100px;
+}
+
+/* ステップの説明テキスト */
+.step-text {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #BCCEE0;
+    display: block;
+    text-align: left;
+}
+
+/* ▼ 中音・高音文字色指定 ▼ */
+.mid-text {
+    color: #ffc0cb;
+    font-weight: bold;
+}
+
+.high-text {
+    color: #ffa500;
+    font-weight: bold;
+}
+
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
     body.game .note-row button,
-    body.game .controls button {
+    body.game .controls button,
+    body.game .start-control button {
         font-size: 0.9rem;
         padding: 6px 12px;
+        height: 50px;
     }
 
     body.game h2 {
@@ -222,132 +286,513 @@ body.game #title {
     }
 }
 
+
 /* ==============================
-   共通設定（トップ・ルール用）
-============================== */
-body.top, body.rules {
-    margin: 0;
-    padding: 0;
-    font-family: 'Lato', sans-serif;
-    color: #fff;
-    min-height: 100vh;
+   ルールページ
+   ============================== */
+
+body.rules {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: url('../images/background.jpg') no-repeat center center fixed;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+    color: #ffffff;
+    background: url("../images/background.jpg") no-repeat center center fixed;
     background-size: cover;
 }
 
-/* ==============================
-   トップページ用 CSS
-============================== */
-.top-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+body.rules .rules-container h2 {
+    color: #800020 !important; /* 青色 */
+    text-shadow: 
+        2px 2px 2px #ffffff,  /* 右下の白影 */
+        -2px -2px 2px #ffffff, /* 左上の白影 */
+        2px -2px 2px #ffffff,  /* 右上の白影 */
+        -2px 2px 2px #ffffff;  /* 左下の白影 */
+    font-weight: 900 !important; /* 太文字 */
+    font-size: 1.8rem;
+    margin-bottom: 20px;
     text-align: center;
-    background-color: rgba(0,0,0,0.75);
-    padding: 40px 50px;
-    border-radius: 25px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.7);
-    width: 90%;
-    max-width: 700px;
 }
 
-.top-container h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.5rem;
-    margin-bottom: 25px;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
-}
 
-.top-container form button {
-    display: inline-block;
-    width: 220px;
-    padding: 14px 0;
-    margin: 12px;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #fff;
-    background: linear-gradient(135deg,#800020,#400010);
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-}
-
-.top-container form button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-}
-
-/* ==============================
-   ルールページ用 CSS
-============================== */
+/* 半透明の中央コンテナ（少し小さめ） */
 .rules-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
-    background-color: rgba(0,0,0,0.75);
-    padding: 40px 50px;
-    border-radius: 25px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.7);
-    width: 90%;
-    max-width: 700px;
+    background: rgba(0, 0, 0, 0.65);
+    padding: 28px 36px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+    width: 80%;
+    max-width: 720px;
+    backdrop-filter: blur(6px);
+    transition: transform 0.3s ease;
 }
 
-.rules-container h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.2rem;
-    margin-bottom: 20px;
-    text-shadow: 1px 1px 6px rgba(0,0,0,0.6);
+/* マウスを乗せたときに少し浮く */
+.rules-container:hover {
+    transform: scale(1.02);
 }
 
-.rules-container ul {
-    list-style: disc;
-    margin: 20px auto;
-    padding-left: 20px;
-    max-width: 600px;
-    text-align: left;
-    font-size: 1.2rem;
+/* 動画をコンパクトに */
+.rules-container video {
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    background: #000;
+    outline: none;
 }
 
+/* 「ゲームへ」ボタン */
 .rules-container .btn {
     display: inline-block;
-    margin-top: 30px;
-    padding: 12px 28px;
-    font-size: 1.2rem;
+    margin-top: 25px;
+    padding: 10px 24px;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #fff;
-    background: linear-gradient(135deg,#800020,#400010);
+    background: linear-gradient(135deg, #800020, #400010);
     border: none;
-    border-radius: 15px;
+    border-radius: 12px;
     cursor: pointer;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     text-decoration: none;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
+/* ホバー時の立体感 */
 .rules-container .btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 
-.rules-container {
-    text-align: left;      /* ルール本文だけ左揃え */
-    max-width: 600px;      /* 幅を制限して見やすく */
-    margin: 0 auto;        /* 画面中央に配置 */
+/* モバイル用（さらに小さく＆余白調整） */
+@media (max-width: 600px) {
+    .rules-container {
+        padding: 20px;
+        width: 90%;
+        border-radius: 12px;
+    }
+
+    .rules-container video {
+        max-width: 100%;
+    }
+
+    .rules-container .btn {
+        width: 100%;
+        padding: 12px 0;
+        font-size: 1rem;
+    }
+}
+   
+/* ==============================
+   ログインページ
+   ============================== */
+
+
+:root{
+  --top-max-width: 1000px;
+  --banner-width-pct: 95%;         /* 画像横幅 */
+  --banner-max-height-desktop: 85vh; /* 少し大きめに調整 */
+  --banner-max-height-tablet: 65vh;
+  --banner-max-height-mobile: 45vh;
+  --top-btn-width: 220px;
 }
 
-.rules-container ol {
-    padding-left: 1.2em;   /* 番号の幅を固定 */
-    margin-left: 0;
-    list-style-position: outside;
+/* 全体背景 */
+body.top{
+  margin: 0;
+  padding: 0;
+  font-family: 'Lato', sans-serif;
+  color: #fff;
+  min-height: 100vh;
+  background: url('../images/roguin-bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 垂直中央 */
+  align-items: center;     /* 水平中央 */
+  text-align: center;
+  box-sizing: border-box;
 }
 
-.rules-container ol li {
-    margin-left: 0;
-    text-indent: 0;        /* 文字を番号の横に揃える */
+/* バナー画像 */
+.top-banner img {
+  width: var(--banner-width-pct);
+  max-height: var(--banner-max-height-desktop);
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  filter:
+    drop-shadow(0 12px 30px rgba(0,0,0,1))
+    drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+  -webkit-filter:
+    drop-shadow(0 12px 30px rgba(0,0,0,1))
+    drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+}
+
+/* ボタン行 */
+.top-buttons{
+  width: 90%;
+  max-width: var(--top-max-width);
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+/* ボタン */
+.top-buttons form button {
+  width: var(--top-btn-width);
+  padding: 12px 0;
+  border-radius: 20px; /* 角を丸く */
+  background: linear-gradient(135deg, #a81d45, #5c0716); /* 赤ボタンのグラデーション */
+  color: #fff;
+  font-weight: 800;
+  border: 3px solid #fff; /* 内側の白枠線 */
+  box-shadow:
+    0 -10px 20px rgba(255, 255, 255, 0.25),   /* 上方向の強め光 */
+    0 -5px 10px rgba(255, 255, 255, 0.2),     /* 上方向の弱め光 */
+    6px 0 12px rgba(255, 255, 255, 0.55),     /* 右方向の光 */
+    -6px 0 12px rgba(255, 255, 255, 0.55);    /* 左方向の光 */
+  position: relative; /* 擬似要素のために必要 */
+  z-index: 1;
+  cursor: pointer;
+}
+
+/* 外側のグラデーション枠線（線だけにする） */
+.top-buttons form button::before {
+  content: '';
+  position: absolute;
+  top: -6px;  /* 枠線の厚み + マージン調整 */
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 25px; /* ボタンより少し大きめ */
+  padding: 3px; /* 枠の厚み */
+  background: linear-gradient(45deg, #E7AA51, #FFE499, #8D5A1B, #E7AA51, #AC7031);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  z-index: -1; /* 背面に配置 */
+  pointer-events: none;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px){
+  .top-banner img {
+    width: 78%;
+    max-height: var(--banner-max-height-tablet);
+  }
+  .top-buttons form button { width: 48%; }
+}
+
+@media (max-width: 480px){
+  .top-banner img {
+    width: 90%;
+    max-height: var(--banner-max-height-mobile);
+  }
+  .top-buttons form button { width: 100%; }
+}
+
+/* ==============================
+   マイページ
+   ============================== */
+   body.mypage {
+    background: url('../images/my.png') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    min-height: 100vh;
+}
+/* 全体ラッパー（コンテナ） */
+.top-container.mypage {
+    background-color: rgba(5, 11, 55, 0.75); /* 元の透けた黒 */
+    padding: 30px 20px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow:
+        0 0 30px rgb(168, 5, 5),
+        0 0 60px rgba(229, 23, 23, 0.95),
+        0 0 100px rgba(107, 0, 0, 0.9);
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    box-sizing: border-box;
+}
+
+/* タイトル */
+.top-container.mypage h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #ffffff;
+    text-shadow: 2px 2px 5px #5c0716;
+    font-weight: 900; /* 太文字にする */
+}
+
+/* セクション */
+.top-container.mypage .section {
+    margin-top: 25px;
+    text-align: left;
+    background-color: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.top-container.mypage .section h3 {
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 10px;
+    color: #f2ff00;
+}
+
+/* チャレンジログ */
+.top-container.mypage .challenge-log {
+    margin-left: 15px;
+}
+
+.top-container.mypage .challenge-log p {
+    margin: 3px 0;
+}
+
+/* サマリー */
+.top-container.mypage .summary {
+    margin-top: 10px;
+    font-weight: 700;
+}
+
+/* トロフィーセクション */
+.top-container.mypage .trophy-section {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.top-container.mypage .trophy-section img {
+    max-width: 150px;
+    margin-top: 10px;
+}
+
+/* 全トロフィー画像 */
+.top-container.mypage .all-trophy img {
+    max-width: 100%;
+    margin-top: 10px;
+    border-radius: 12px;
+}
+
+/* 結果をXでシェアボタン */
+.top-container.mypage .share-btn {
+    margin-top: 10px;
+    padding: 10px 16px;
+    font-weight: 700;
+    background-color: #800020;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #fff;
+}
+
+/* コントロールボタン（ゲームに戻る / ログアウト） */
+.top-container.mypage .controls {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.top-container.mypage button.logout-btn,
+.top-container.mypage button.game-btn {
+    flex: 1;
+    padding: 8px 12px;      /* 上下8px、左右12px */
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #800020, #400010);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.top-container.mypage button.logout-btn:hover,
+.top-container.mypage button.game-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* ログアウトオーバーレイ */
+.top-container.mypage #logout-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.top-container.mypage #logout-overlay img {
+    max-width: 400px;
+}
+
+/* 過去1週間アコーディオン */
+.top-container.mypage .week-accordion {
+    margin-top: 12px;
+    background: rgba(0,0,0,0.45);
+    padding: 8px;
+    border-radius: 10px;
+}
+
+.top-container.mypage .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: background .15s;
+}
+
+.top-container.mypage .day-header:hover {
+    background: rgba(255,255,255,0.02);
+}
+
+.top-container.mypage .day-title {
+    font-weight: 700;
+    color: #ffd;
+}
+
+.top-container.mypage .day-count {
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
+.top-container.mypage .day-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.22s ease;
+    padding: 0 10px;
+}
+
+.top-container.mypage .day-body.open {
+    padding-top: 8px;
+    padding-bottom: 10px;
+}
+
+.top-container.mypage .week-item {
+    margin-left: 6px;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+}
+
+.top-container.mypage .no-items {
+    color: #bbb;
+    font-style: italic;
+    margin-left: 6px;
+}
+
+/* 先生フォーム送信UI（簡易版） */
+.top-container.mypage .teacher-form-simple {
+    margin-top: 12px;
+    background: rgba(255,255,255,0.03);
+    padding: 10px;
+    border-radius: 8px;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.top-container.mypage .teacher-form-simple input[type="text"] {
+    flex:1 1 100%;
+    padding:8px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.6);
+    color:#fff;
+    box-sizing:border-box;
+}
+
+.top-container.mypage .teacher-form-simple .submit-btn {
+    padding: 12px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #800020, #400010);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 130px;
+}
+
+.top-container.mypage .teacher-form-simple .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.top-container.mypage .teacher-form-simple .submit-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.top-container.mypage .teacher-form-simple label {
+    display:flex;
+    gap:8px;
+    align-items:center;
+    color:#ffd;
+    font-weight:700;
+}
+
+/* 確認モーダル */
+.top-container.mypage .confirm-overlay {
+    display:none;
+    position:fixed;
+    z-index:10000;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.7);
+    justify-content:center;
+    align-items:center;
+}
+
+.top-container.mypage .confirm-box {
+    background:rgba(255,255,255,0.06);
+    padding:18px;
+    border-radius:12px;
+    width:90%;
+    max-width:420px;
+    color:#fff;
+    text-align:left;
+}
+
+.top-container.mypage .confirm-box p { margin:8px 0; }
+
+.top-container.mypage .confirm-buttons {
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:12px;
 }

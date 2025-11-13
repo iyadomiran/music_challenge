@@ -4,165 +4,468 @@
 <head>
     <meta charset="utf-8">
     <title>Pitch Master - マイページ</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Lato', sans-serif;
-            background: url('{% static "images/background.jpg" %}') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #fff;
-        }
-
-        .top-container {
-            background-color: rgba(0,0,0,0.75);
-            padding: 30px 20px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
-            width: 100%;
-            max-width: 500px;
-        }
-
-        h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: #ffffff;
-            text-shadow: 2px 2px 5px #000;
-        }
-
-        select {
-            padding: 8px;
-            margin-bottom: 16px;
-            font-size: 1rem;
-            border-radius: 8px;
-            width: 100%;
-        }
-
-        canvas {
-            margin-top: 20px;
-            border-radius: 12px;
-            background-color: rgba(255,255,255,0.1);
-            width: 100% !important;
-            max-height: 250px;
-            height: auto !important;
-        }
-
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px 0;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #fff;
-            background: linear-gradient(135deg, #800020, #400010);
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        @media (max-width: 480px) {
-            h2 { font-size: 1.5rem; }
-            button { font-size: 1rem; }
-        }
-    </style>
+    <!-- 外部CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/steps.css' %}">
+    <!-- 移動したカスタムスタイル -->
+    <link rel="stylesheet" href="{% static 'css/mypage_custom.css' %}">
 </head>
-<body>
-<div class="top-container">
+<body class="mypage">
+<div class="top-container mypage">
     {% if user.is_authenticated %}
-        <h2>🎵今日の{{ user.username }}さんのスコアグラフ🎵</h2>
+        <h2>今日の{{ user.username }}さんのトレーニング結果</h2>
 
-        <!-- 日付選択 -->
-        <select id="dateSelect">
-            {% for date in available_dates %}
-                <option value="{{ date }}">{{ date }}</option>
-            {% endfor %}
-        </select>
+        <div class="section">
+            <h3>今日のトレーニング結果を振り返ろう！</h3>
+            <div class="challenge-log">
+                {% for c in challenges %}
+                    <p>
+                        {{ forloop.counter }}問目(
+                        レベル
+                        {% if c.level == 'beginner' %}
+                            1
+                        {% elif c.level == 'intermediate' %}
+                            2
+                        {% elif c.level == 'advanced' %}
+                            3
+                        {% else %}
+                            {{ c.level }}
+                        {% endif %}
+                        選択) ▶︎ 正解音:
+                        {% if c.correct == 'do' or c.correct == 'ド' %}
+                            ド
+                        {% elif c.correct == 're' or c.correct == 'レ' %}
+                            レ
+                        {% elif c.correct == 'mi' or c.correct == 'ミ' %}
+                            ミ
+                        {% elif c.correct == 'fa' or c.correct == 'ファ' %}
+                            ファ
+                        {% elif c.correct == 'so' or c.correct == 'ソ' %}
+                            ソ
+                        {% elif c.correct == 'ra' or c.correct == 'la' or c.correct == 'ラ' %}
+                            ラ
+                        {% elif c.correct == 'si' or c.correct == 'シ' %}
+                            シ
+                        {% elif c.correct == 'do1' or c.correct == '高ド' or c.correct == '高ド1' %}
+                            ド（高）
+                        {% elif c.correct == 're1' or c.correct == '高レ' %}
+                            レ（高）
+                        {% elif c.correct == 'mi1' or c.correct == '高ミ' %}
+                            ミ（高）
+                        {% elif c.correct == 'fa1' or c.correct == '高ファ' %}
+                            ファ（高）
+                        {% elif c.correct == 'so1' or c.correct == '高ソ' %}
+                            ソ（高）
+                        {% elif c.correct == 'la1' or c.correct == '高ラ' %}
+                            ラ（高）
+                        {% elif c.correct == 'si1' or c.correct == '高シ' %}
+                            シ（高）
+                        {% elif c.correct == 'do2' or c.correct == 'さらに高音ド' or c.correct == 'high_do2' %}
+                            ド（最高）
+                        {% else %}
+                            {{ c.correct }}
+                        {% endif %}
+                        　回答音:
+                        {% if c.user_answer == 'do' or c.user_answer == 'ド' %}
+                            ド
+                        {% elif c.user_answer == 're' or c.user_answer == 'レ' %}
+                            レ
+                        {% elif c.user_answer == 'mi' or c.user_answer == 'ミ' %}
+                            ミ
+                        {% elif c.user_answer == 'fa' or c.user_answer == 'ファ' %}
+                            ファ
+                        {% elif c.user_answer == 'so' or c.user_answer == 'ソ' %}
+                            ソ
+                        {% elif c.user_answer == 'ra' or c.user_answer == 'la' or c.user_answer == 'ラ' %}
+                            ラ
+                        {% elif c.user_answer == 'si' or c.user_answer == 'シ' %}
+                            シ
+                        {% elif c.user_answer == 'do1' or c.user_answer == '高ド' or c.user_answer == '高ド1' %}
+                            ド（高）
+                        {% elif c.user_answer == 're1' or c.user_answer == '高レ' %}
+                            レ（高）
+                        {% elif c.user_answer == 'mi1' or c.user_answer == '高ミ' %}
+                            ミ（高）
+                        {% elif c.user_answer == 'fa1' or c.user_answer == '高ファ' %}
+                            ファ（高）
+                        {% elif c.user_answer == 'so1' or c.user_answer == '高ソ' %}
+                            ソ（高）
+                        {% elif c.user_answer == 'la1' or c.user_answer == '高ラ' %}
+                            ラ（高）
+                        {% elif c.user_answer == 'si1' or c.user_answer == '高シ' %}
+                            シ（高）
+                        {% elif c.user_answer == 'do2' or c.user_answer == 'さらに高音ド' or c.user_answer == 'high_do2' %}
+                            ド（最高）
+                        {% else %}
+                            {{ c.user_answer }}
+                        {% endif %}
+                        　で{% if c.correct == c.user_answer %}正解！⭕️{% else %}間違い！❌{% endif %}
+                    </p>
+                {% empty %}
+                    <p>今日のチャレンジはありません。</p>
+                {% endfor %}
+            </div>
 
-        <canvas id="scoreChart"></canvas>
+            <div class="summary">
+                ⭐️今日は、【{{ challenges|length|default:0 }}問】チャレンジしました！！<br>
+                ⭐️{{ correct_count|default:0 }}問正解のため、正解率【{{ correct_rate|default:0 }}%】です。<br>
 
+                <div style="margin-top:8px;">
+                    {% with wrong_count=0 %}
+                        {% for c in challenges %}
+                            {% if c.correct != c.user_answer %}
+                                {% if c.correct == 'do' or c.correct == 'ド' %}
+                                    <p>💧苦手音程：完全1度（同音）／中音域</p>
+                                {% elif c.correct == 're' or c.correct == 'レ' %}
+                                    <p>💧苦手音程：長2度上（ド→レ）／中音域</p>
+                                {% elif c.correct == 'mi' or c.correct == 'ミ' %}
+                                    <p>💧苦手音程：長3度上（ド→ミ）／中音域</p>
+                                {% elif c.correct == 'fa' or c.correct == 'ファ' %}
+                                    <p>💧苦手音程：完全4度上（ド→ファ）／中音域</p>
+                                {% elif c.correct == 'so' or c.correct == 'ソ' %}
+                                    <p>💧苦手音程：完全5度上（ド→ソ）／中音域</p>
+                                {% elif c.correct == 'ra' or c.correct == 'la' or c.correct == 'ラ' %}
+                                    <p>💧苦手音程：長6度上（ド→ラ）／中音域</p>
+                                {% elif c.correct == 'si' or c.correct == 'シ' %}
+                                    <p>💧苦手音程：長7度上（ド→シ）／中音域</p>
+                                {% elif c.correct == 'do1' or c.correct == '高ド' or c.correct == '高ド1' %}
+                                    <p>💧苦手音程：完全1度（同音）／高音域</p>
+                                {% elif c.correct == 're1' or c.correct == '高レ' %}
+                                    <p>💧苦手音程：長2度上（高音ド→高音レ）／高音域</p>
+                                {% elif c.correct == 'mi1' or c.correct == '高ミ' %}
+                                    <p>💧苦手音程：長3度上（高音ド→高音ミ）／高音域</p>
+                                {% elif c.correct == 'fa1' or c.correct == '高ファ' %}
+                                    <p>💧苦手音程：完全4度上（高音ド→高音ファ）／高音域</p>
+                                {% elif c.correct == 'so1' or c.correct == '高ソ' %}
+                                    <p>💧苦手音程：完全5度上（高音ド→高音ソ）／高音域</p>
+                                {% elif c.correct == 'la1' or c.correct == '高ラ' %}
+                                    <p>💧苦手音程：長6度上（高音ド→高音ラ）／高音域</p>
+                                {% elif c.correct == 'si1' or c.correct == '高シ' %}
+                                    <p>💧苦手音程：長7度上（高音ド→高音シ）／高音域</p>
+                                {% elif c.correct == 'do2' or c.correct == 'さらに高音ド' or c.correct == 'high_do2' %}
+                                    <p>💧苦手音程：完全8度上（高音ド→さらに高音ド）／高音域上限</p>
+                                {% else %}
+                                    <p>💧苦手音程：{{ c.correct }}（判定キー）／誤答記録あり</p>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+
+                    {% if not challenges %}
+                    💧苦手な音は【{{ weak_notes|default:''|join:'、' }}】です。
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 過去の結果 -->
+        <div class="section">
+            <h3>過去の結果を見よう（今週：月〜日）</h3>
+            <div class="week-accordion" id="weekAccordion">
+                {% for day in past_week_grouped %}
+                    <div class="day-block">
+                        <div class="day-header" data-day-index="{{ forloop.counter0 }}">
+                            <div class="day-title">{{ day.date|date:"Y年n月j日（D）" }}</div>
+                            <div class="day-count">{{ day.items|length }}問チャレンジしたよ</div>
+                        </div>
+                        <div class="day-body" id="day-body-{{ forloop.counter0 }}">
+                            {% if day.items %}
+                                {% for item in day.items %}
+                                    <div class="week-item">
+                                        <strong>{{ item.created_at|date:"H:i" }}</strong> —
+                                        レベル:
+                                        {% if item.level == 'beginner' %}1{% elif item.level == 'intermediate' %}2{% elif item.level == 'advanced' %}3{% else %}{{ item.level }}{% endif %}
+                                        ／ 正解:
+                                        {% if item.correct == 'do' or item.correct == 'ド' %}ド{% elif item.correct == 're' or item.correct == 'レ' %}レ{% elif item.correct == 'mi' or item.correct == 'ミ' %}ミ{% elif item.correct == 'fa' or item.correct == 'ファ' %}ファ{% elif item.correct == 'so' or item.correct == 'ソ' %}ソ{% elif item.correct == 'ra' or item.correct == 'la' or item.correct == 'ラ' %}ラ{% elif item.correct == 'si' or item.correct == 'シ' %}シ{% else %}{{ item.correct }}{% endif %}
+                                        ／ 回答:
+                                        {% if item.user_answer == 'do' or item.user_answer == 'ド' %}ド{% elif item.user_answer == 're' or item.user_answer == 'レ' %}レ{% elif item.user_answer == 'mi' or item.user_answer == 'ミ' %}ミ{% elif item.user_answer == 'fa' or item.user_answer == 'ファ' %}ファ{% elif item.user_answer == 'so' or item.user_answer == 'ソ' %}ソ{% elif item.user_answer == 'ra' or item.user_answer == 'la' or item.user_answer == 'ラ' %}ラ{% elif item.user_answer == 'si' or item.user_answer == 'シ' %}シ{% else %}{{ item.user_answer }}{% endif %}
+                                        ／ {% if item.correct == item.user_answer %}正解✅{% else %}間違い❌{% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-items">この日は記録がありません。</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <p style="font-size:0.8rem; margin-top:8px;">※日をクリックするとその日の記録を開閉できます（0件の日も表示されます）。</p>
+
+            <!-- Googleフォーム提出 -->
+            <div class="teacher-form-simple" id="teacherFormSimple">
+                <h3>一週間分の結果を先生に提出しよう（Googleフォーム）</h3>
+                <input type="text" id="teacherFormUrl" placeholder="先生から配布されたGoogleフォームのURLをここに貼り付けてください（例: https://docs.google.com/forms/...）">
+                <label>
+                    <input type="checkbox" id="consentCheckbox">
+                    URLに間違いはありません（先生から配布された正しいURLです）
+                </label>
+                <button class="submit-btn" id="btnSendToTeacher" type="button" disabled>提出する</button>
+            </div>
+        </div>
+
+        <!-- ランク・トロフィー -->
+        <div class="section trophy-section">
+            <h3>現在のランクとトロフィー</h3>
+            {% with consecutive_days|default:0 as cd %}
+                {% if cd <= 6 %}
+                    <img src="{% static 'images/drank.jpg' %}" alt="Dランクトロフィー">
+                    <p>現在連続トレーニング {{ cd }}日目。<br>Dランクpitch master！<br>連続トレーニング7日目にCランクへレベルアップ！</p>
+                {% elif cd <= 29 %}
+                    <img src="{% static 'images/crank.jpg' %}" alt="Cランクトロフィー">
+                    <p>現在連続トレーニング {{ cd }}日目。<br>Cランクpitch master！<br>連続トレーニング30日目にBランクへレベルアップ！</p>
+                {% elif cd <= 89 %}
+                    <img src="{% static 'images/brank.jpg' %}" alt="Bランクトロフィー">
+                    <p>現在連続トレーニング {{ cd }}日目。<br>Bランクpitch master！<br>連続トレーニング90日目にAランクへレベルアップ！</p>
+                {% elif cd <= 179 %}
+                    <img src="{% static 'images/arank.jpg' %}" alt="Aランクトロフィー">
+                    <p>現在連続トレーニング {{ cd }}日目。<br>Aランクpitch master！<br>連続トレーニング180日目にトップSランクへレベルアップ！</p>
+                {% else %}
+                    <img src="{% static 'images/srank.jpg' %}" alt="Sランクトロフィー">
+                    <p>現在連続トレーニング {{ cd }}日目。<br>貴方は今、トップランクトロフィーを獲得しているSランクpitch masterです。</p>
+                {% endif %}
+            {% endwith %}
+            <button class="share-btn" onclick="shareX()">結果をXでシェア</button>
+            <p style="font-size:0.8rem; margin-top:5px;">【※毎日トレーニングを続けることで、トロフィーがレベルアップします。1日でもトレーニングを中止した場合は、ランク問わずDランクにレベルダウンします。】</p>
+        </div>
+
+        <!-- 全トロフィー一覧 -->
+        <div class="section all-trophy">
+            <h3>全トロフィーの種類</h3>
+            <img src="{% static 'images/all-trophy.jpg' %}" alt="全トロフィー一覧">
+        </div>
+
+        <!-- コントロール -->
         <div class="controls">
-            <a href="{% url 'game' %}"><button>ゲームに戻る</button></a>
-            <form method="post" action="{% url 'logout_view' %}">
+           <a href="{% url 'game' %}?play=training_mode">
+                <button type="button" class="game-btn">training mode の ゲームへ</button>
+            </a>
+            <a href="{% url 'game2' %}?play=stage_mode">
+                <button type="button" class="game-btn">stage mode の ゲームへ</button>
+            </a>
+            <form id="logoutForm" method="post" action="{% url 'logout_view' %}">
                 {% csrf_token %}
-                <button type="submit">ログアウト</button>
+                <button type="button" class="logout-btn" onclick="handleLogout()">ログアウト</button>
             </form>
         </div>
 
+        <div id="logout-overlay">
+            <img src="{% static 'images/otukare.PNG' %}" alt="お疲れ様">
+        </div>
+
+        <!-- 確認モーダル -->
+        <div class="confirm-overlay" id="confirmOverlay">
+            <div class="confirm-box">
+                <h3>このURLで送信してよろしいですか？</h3>
+                <p id="confirmUrlText" style="word-break:break-all;"></p>
+                <p style="font-size:0.9rem;color:#ddd;">送信はサーバー経由で行われます。送信内容：この画面に表示されている「今週の一週間分」の要約テキストを、指定のフォームにサーバー側でPOSTします。</p>
+                <div class="confirm-buttons">
+                    <button class="small-btn secondary" id="confirmCancel">キャンセル</button>
+                    <button class="small-btn" id="confirmSend">送信する</button>
+                </div>
+            </div>
+        </div>
+
         <script>
-            // スコアデータをテンプレートから取得
-            const scoreData = {{ scores_by_date_json|safe }};
-            const ctx = document.getElementById('scoreChart').getContext('2d');
-            const dateSelect = document.getElementById('dateSelect');
-            let currentChart = null;
-
-            function renderChart(selectedDate) {
-                const labels = scoreData[selectedDate].labels;
-                const data = scoreData[selectedDate].data;
-
-                // 既存チャートがあれば破棄
-                if (currentChart) currentChart.destroy();
-
-                currentChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'スコア',
-                            data: data,
-                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 100,
-                                ticks: { stepSize: 10 }
-                            }
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { enabled: true }
+            document.addEventListener('DOMContentLoaded', function () {
+                // アコーディオン処理
+                const headers = document.querySelectorAll('.day-header');
+                headers.forEach(h => {
+                    h.addEventListener('click', () => {
+                        const idx = h.getAttribute('data-day-index');
+                        const body = document.getElementById('day-body-' + idx);
+                        if (!body) return;
+                        const open = body.classList.contains('open');
+                        if (open) {
+                            body.style.maxHeight = '0';
+                            body.classList.remove('open');
+                        } else {
+                            body.classList.add('open');
+                            body.style.maxHeight = body.scrollHeight + 'px';
                         }
-                    }
+                    });
                 });
+
+                const bodies = document.querySelectorAll('.day-body');
+                bodies.forEach(b => {
+                    b.style.maxHeight = '0';
+                });
+
+                setupSimpleTeacherForm();
+                document.getElementById('logout-overlay').style.display = 'none';
+            });
+
+            function shareX() {
+                const consecutiveDays = parseInt("{{ consecutive_days|default:0 }}", 10) || 0;
+                const trophyUrls = {
+                    drank: "{% static 'images/drank.jpg' %}",
+                    crank: "{% static 'images/crank.jpg' %}",
+                    brank: "{% static 'images/brank.jpg' %}",
+                    arank: "{% static 'images/arank.jpg' %}",
+                    srank: "{% static 'images/srank.jpg' %}"
+                };
+                let chosen;
+                if (consecutiveDays <= 6) {
+                    chosen = trophyUrls.drank;
+                } else if (consecutiveDays <= 29) {
+                    chosen = trophyUrls.crank;
+                } else if (consecutiveDays <= 89) {
+                    chosen = trophyUrls.brank;
+                } else if (consecutiveDays <= 179) {
+                    chosen = trophyUrls.arank;
+                } else {
+                    chosen = trophyUrls.srank;
+                }
+
+                const text = `🎉 Pitch Masterでのトレーニング報告 🎉\n連続トレーニング: ${consecutiveDays}日目\nトロフィー: ${chosen}\n#pitchmaster`;
+                const intentText = encodeURIComponent(text);
+                const intentUrl = encodeURIComponent(chosen);
+                const tweetIntent = `https://twitter.com/intent/tweet?text=${intentText}&url=${intentUrl}`;
+                window.open(tweetIntent, "_blank");
             }
 
-            // 初期表示は選択中の値
-            renderChart(dateSelect.value);
+            function handleLogout() {
+                const overlay = document.getElementById('logout-overlay');
+                overlay.style.display = 'flex';
+                setTimeout(() => {
+                    document.getElementById('logoutForm').submit();
+                }, 5000);
+            }
 
-            // 日付変更時にグラフ更新
-            dateSelect.addEventListener('change', () => {
-                renderChart(dateSelect.value);
-            });
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            function setupSimpleTeacherForm() {
+                const input = document.getElementById('teacherFormUrl');
+                const consent = document.getElementById('consentCheckbox');
+                const btnSend = document.getElementById('btnSendToTeacher');
+                const confirmOverlay = document.getElementById('confirmOverlay');
+                const confirmUrlText = document.getElementById('confirmUrlText');
+                const confirmCancel = document.getElementById('confirmCancel');
+                const confirmSend = document.getElementById('confirmSend');
+
+                btnSend.disabled = true;
+
+                input.addEventListener('input', updateButtonState);
+                consent.addEventListener('change', updateButtonState);
+
+                function updateButtonState() {
+                    const url = (input.value || '').trim();
+                    btnSend.disabled = !(isValidUrlFormat(url) && consent.checked);
+                }
+
+                btnSend.addEventListener('click', () => {
+                    const url = (input.value || '').trim();
+                    if (!isValidUrlFormat(url)) {
+                        alert('URL形式が正しくありません。http(s)で始まる正しいURLを貼り付けてください。');
+                        return;
+                    }
+                    if (!consent.checked) {
+                        alert('送信する場合は「URLに間違いはありません」にチェックしてください。');
+                        return;
+                    }
+
+                    confirmUrlText.textContent = url + '\n\n(送信内容は画面に表示されている「今週の一週間分」の要約テキストです。ログインユーザー名も含まれます)';
+                    confirmOverlay.style.display = 'flex';
+                });
+
+                confirmCancel.addEventListener('click', () => {
+                    confirmOverlay.style.display = 'none';
+                });
+
+                confirmSend.addEventListener('click', async () => {
+                    confirmOverlay.style.display = 'none';
+                    const url = (input.value || '').trim();
+                    const weekText = collectWeekSummaryText();
+                    if (!weekText) {
+                        alert('今週の記録がありません。送信できません。');
+                        return;
+                    }
+
+                    try {
+                        const resp = await fetch('/api/submit_week_results/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken') || ''
+                            },
+                            body: JSON.stringify({
+                                form_url: url,
+                                week_summary: weekText,
+                                username: "{{ user.username|escapejs }}",
+                                week_hint: "週（月〜日）"
+                            })
+                        });
+                        if (!resp.ok) {
+                            const txt = await resp.text().catch(()=>'');
+                            alert('送信失敗（サーバー応答: ' + resp.status + '） ' + txt);
+                        } else {
+                            const data = await resp.json().catch(()=>null);
+                            if (data && data.ok) {
+                                alert('送信成功: ' + (data.message || '先生のフォームに送信しました'));
+                            } else {
+                                alert('送信失敗: ' + (data && data.message ? data.message : 'サーバーがエラーを返しました'));
+                            }
+                        }
+                    } catch (e) {
+                        alert('送信中にエラーが発生しました（ネットワークまたはサーバー）。');
+                    }
+                });
+
+                function isValidUrlFormat(url) {
+                    try {
+                        const u = new URL(url);
+                        if (!['http:', 'https:'].includes(u.protocol)) return false;
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                }
+            }
+
+            function collectWeekSummaryText() {
+                const dayBlocks = document.querySelectorAll('.week-accordion .day-block');
+                if (!dayBlocks || dayBlocks.length === 0) return '';
+                let lines = [];
+                dayBlocks.forEach(db => {
+                    const dateEl = db.querySelector('.day-title');
+                    const title = dateEl ? dateEl.innerText.trim() : '';
+                    const items = db.querySelectorAll('.week-item');
+                    if (!items || items.length === 0) {
+                        lines.push(`${title} — 記録なし`);
+                    } else {
+                        lines.push(`=== ${title} ===`);
+                        items.forEach(it => {
+                            lines.push(it.innerText.replace(/\s+/g,' ').trim());
+                        });
+                    }
+                });
+                return lines.join('\n');
+            }
+
+            function escapeHtml(str) {
+                return str.replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); });
+            }
         </script>
+
     {% else %}
         <p>このページはログインユーザーのみアクセス可能です。</p>
     {% endif %}
 </div>
 </body>
 </html>
+
+<script>
+window.addEventListener("load", function() {
+    const params = new URLSearchParams(window.location.search);
+    const play = params.get("play");
+    if (play === "training_mode") {
+        new Audio("{% static 'sounds/training_mode.mp3' %}").play();
+    } else if (play === "stage_mode") {
+        new Audio("{% static 'sounds/stage_mode.mp3' %}").play();
+    }
+});
+</script>

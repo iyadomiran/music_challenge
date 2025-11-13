@@ -1,152 +1,243 @@
-from django.shortcuts import render, redirect  # テンプレート表示・リダイレクト用
-from django.contrib.auth.models import User   # Django標準のユーザーモデル
-from django.contrib.auth import authenticate, login, logout  # 認証用関数
-from django.contrib import messages             # 画面上の通知メッセージ用
-from django.contrib.auth.decorators import login_required  # ログイン必須デコレーター
-from django.http import JsonResponse            # JSONレスポンスを返すため
-from .models import Score, SongPattern          # 自作モデル（スコア・曲パターン）
-from django.utils import timezone               # 日付・時間操作用
-import json                                     # JSON操作用
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from django.db.models import F
+from datetime import timedelta, date, datetime
+import json
+import logging
+import os
+import base64
+from django.conf import settings
+from django.utils import timezone
 
-# トップページ表示
-def top_view(request):
-    # top.htmlを表示
+from .forms import RegisterForm
+from .models import Challenge
+
+# ログ出力用 logger
+logger = logging.getLogger(__name__)
+
+# ----------------- 既存ビュー -----------------
+def top(request):
     return render(request, 'compose/top.html')
 
-# ゲストプレイ（ログインなしでルールページへ）
-def guest_play_view(request):
-    # セッションにゲストフラグをセット
-    request.session['guest'] = True
-    # ルールページへリダイレクト
-    return redirect('rules')
-
-# ルールページ表示
 def rules(request):
     return render(request, 'compose/rules.html')
 
-# ゲーム画面表示（DBから曲パターンを取得してテンプレートに渡す）
-def compose_view(request):
-    # DBから全曲パターンを取得
-    patterns = SongPattern.objects.all()
+@ensure_csrf_cookie
+def game(request):
+    return render(request, 'compose/compose.html')
 
-    # 難易度別に辞書化
-    song_patterns = {
-        "beginner": [p.pattern for p in patterns.filter(level="beginner")],
-        "intermediate": [p.pattern for p in patterns.filter(level="intermediate")],
-        "advanced": [p.pattern for p in patterns.filter(level="advanced")],
-    }
+def game2(request):
+    return render(request, 'compose/game2.html')
 
-    # compose.htmlに渡す
-    return render(request, 'compose/compose.html', {'song_patterns': song_patterns})
-
-# ユーザー新規登録
-def register_view(request):
-    if request.method == 'POST':
-        # フォームから値を取得
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '').strip()
-
-        # 入力チェック
-        if not username or not password:
-            messages.error(request, "ユーザー名とパスワードを入力してください。")
-            return redirect('register')
-
-        # ユーザー名の重複チェック
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "そのユーザー名は既に使われています。")
-            return redirect('register')
-
-        # 新規ユーザー作成
-        user = User.objects.create_user(username=username, password=password)
-        user.save()
-        messages.success(request, "ユーザー登録が完了しました。ログインしてください。")
-        return redirect('login')
-
-    # GET時は登録フォームを表示
-    return render(request, 'compose/register.html')
-
-# ユーザーログイン
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
-
-        # 認証
+        if not username or not password:
+            messages.error(request, 'ユーザー名とパスワードを入力してください。')
+            return render(request, 'compose/login.html')
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
-            # 認証成功
             login(request, user)
             return redirect('rules')
         else:
-            # 認証失敗
-            messages.error(request, "ユーザー名またはパスワードが間違っています。")
-            return redirect('login')
+            messages.error(request, 'ユーザー名またはパスワードが間違っています。')
+            return render(request, 'compose/login.html')
+    else:
+        return render(request, 'compose/login.html')
 
-    # GET時はログインフォームを表示
-    return render(request, 'compose/login.html')
-
-# ユーザーログアウト
 def logout_view(request):
-    # ログアウト処理
-    logout(request)
-    messages.success(request, "ログアウトしました。")
+    if request.method == 'POST':
+        logout(request)
+        return redirect('top')
     return redirect('top')
 
-# マイページ（ログインユーザー専用）
-@login_required
-def mypage_view(request):
-    # 今日の日付を取得
+def register(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            User.objects.create_user(username=username, password=password)
+            messages.success(request, '登録しました。ログインしてください。')
+            return redirect('login')
+        else:
+            for e in form.errors.values():
+                messages.error(request, e)
+            return render(request, 'compose/register.html', {'form': form})
+    else:
+        form = RegisterForm()
+    return render(request, 'compose/register.html', {'form': form})
+
+def guest_play(request):
+    request.session['is_guest'] = True
+    return redirect('rules')
+
+def mypage(request):
+    if not request.user.is_authenticated:
+        messages.error(request, 'ログインが必要です。')
+        return redirect('login')
     today = timezone.localdate()
+    challenges = Challenge.objects.filter(user=request.user, created_at__date=today).order_by('created_at')[:50]
+    total = challenges.count()
+    correct_count = sum(1 for c in challenges if c.correct and c.user_answer and c.correct == c.user_answer)
+    correct_rate = int((correct_count / total) * 100) if total > 0 else 0
 
-    # ユーザーのスコアを日付順に取得
-    scores_by_date = {}
-    qs = Score.objects.filter(user=request.user).order_by('played_at')
-    for s in qs:
-        date_str = s.played_at.strftime('%Y-%m-%d')
-        if date_str not in scores_by_date:
-            scores_by_date[date_str] = []
-        scores_by_date[date_str].append(s.score)
+    all_challenges_qs = Challenge.objects.filter(user=request.user)
+    dates = set()
+    for ch in all_challenges_qs:
+        try:
+            local_dt = timezone.localtime(ch.created_at)
+            dates.add(local_dt.date())
+        except Exception:
+            try:
+                dates.add(ch.created_at.date())
+            except Exception:
+                logger.warning("Failed to convert created_at to date for Challenge id=%s", getattr(ch, 'id', 'unknown'))
 
-    # 今日のスコア
-    today_str = today.strftime('%Y-%m-%d')
-    today_scores = scores_by_date.get(today_str, [])
+    consecutive_days = 0
+    d = timezone.localdate()
+    while d in dates:
+        consecutive_days += 1
+        d = d - timedelta(days=1)
 
-    # 今日の最新スコアと全期間の最高スコア
-    latest_score = today_scores[-1] if today_scores else None
-    best_score = max([score for scores in scores_by_date.values() for score in scores]) if scores_by_date else None
+    if total == 0:
+        weak_notes = []
+    else:
+        wrongs = Challenge.objects.filter(user=request.user).exclude(correct=F('user_answer'))
+        weak_notes = list(wrongs.values_list('correct', flat=True).distinct()[:10])
 
-    # JSON形式に変換（グラフ描画用）
-    scores_json = {}
-    for date, scores in scores_by_date.items():
-        scores_json[date] = {
-            "labels": [f"挑戦{i+1}" for i, s in enumerate(scores)],
-            "data": scores
-        }
+    days_count = 7
+    today_local = timezone.localdate()
+    week_start = today_local - timedelta(days=today_local.weekday())
+    week_end = week_start + timedelta(days=days_count - 1)
 
-    # テンプレートに渡す
+    past_range_qs = Challenge.objects.filter(
+        user=request.user,
+        created_at__date__range=(week_start, week_end)
+    ).order_by('created_at')
+
+    mapping = {}
+    for ch in past_range_qs:
+        try:
+            d_local = timezone.localtime(ch.created_at).date()
+        except Exception:
+            d_local = ch.created_at.date()
+        mapping.setdefault(d_local, []).append(ch)
+
+    past_days_grouped = []
+    for i in range(days_count):
+        d_iter = week_start + timedelta(days=i)
+        items = mapping.get(d_iter, [])
+        past_days_grouped.append({
+            'date': d_iter,
+            'items': items
+        })
+
     context = {
-        'username': request.user.username,
-        'available_dates': list(scores_by_date.keys()),
-        'scores_by_date_json': json.dumps(scores_json),
-        'latest_score': latest_score,
-        'best_score': best_score,
+        'challenges': challenges,
+        'correct_count': correct_count,
+        'correct_rate': correct_rate,
+        'consecutive_days': consecutive_days,
+        'weak_notes': weak_notes,
+        'past_week_grouped': past_days_grouped,
     }
-
     return render(request, 'compose/mypage.html', context)
 
-# ゲーム終了時スコア保存
-@login_required
-def save_score(request):
-    if request.method == 'POST':
-        try:
-            # フォームから送信されたスコアを取得
-            score_value = int(request.POST.get('score', 0))
-            # データベースに保存
-            Score.objects.create(user=request.user, score=score_value)
-            return JsonResponse({'status': 'ok'})
-        except ValueError:
-            return JsonResponse({'status': 'error', 'message': '無効なスコア'})
+@require_POST
+def save_challenge(request):
+    logger.info("save_challenge called, user=%s, body=%s", request.user if request.user.is_authenticated else "Anonymous", request.body)
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except Exception as e:
+        logger.exception("invalid json in save_challenge")
+        return HttpResponseBadRequest('invalid json')
 
-    # POST以外はエラー
-    return JsonResponse({'status': 'error', 'message': 'POSTメソッドのみ許可'})
+    level = payload.get('level', '')[:64]
+    correct = payload.get('correct', '')[:255]
+    user_answer = payload.get('user_answer', '')[:255]
+
+    if not correct:
+        logger.warning("save_challenge missing 'correct'")
+        return HttpResponseBadRequest('missing correct')
+    if user_answer is None:
+        logger.warning("save_challenge missing 'user_answer'")
+        return HttpResponseBadRequest('missing user_answer')
+
+    user = request.user if request.user.is_authenticated else None
+
+    ch = Challenge.objects.create(
+        user=user,
+        level=level,
+        correct=correct,
+        user_answer=user_answer
+    )
+
+    logger.info("Challenge created id=%s user=%s level=%s correct=%s user_answer=%s", ch.id, user.username if user else 'None', level, correct, user_answer)
+    return JsonResponse({'status': 'ok', 'id': ch.id})
+
+@csrf_exempt
+def upload_audio(request):
+    """
+    MediaRecorder で録音した音声をサーバーに保存
+    """
+    if request.method == 'POST':
+        audio_data = request.POST.get('audio')
+        if audio_data:
+            try:
+                header, audio_base64 = audio_data.split(',', 1)
+                audio_bytes = base64.b64decode(audio_base64)
+            except Exception as e:
+                logger.exception("Failed to decode audio base64")
+                return JsonResponse({'status': 'ng', 'error': 'invalid audio data'})
+
+            filename = f"recorded_{datetime.now().strftime('%Y%m%d%H%M%S')}.webm"
+            save_path = os.path.join(settings.MEDIA_ROOT, filename)
+            os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+            with open(save_path, 'wb') as f:
+                f.write(audio_bytes)
+            return JsonResponse({'status': 'ok', 'filename': filename})
+    return JsonResponse({'status': 'ng'})
+
+# ----------------- 新規追加ビュー: ピッチ解析 -----------------
+import librosa
+import matplotlib.pyplot as plt
+import numpy as np
+
+def analyze_pitch(request):
+    """
+    POSTで送信された音声ファイルを解析し、ピッチ折れ線グラフを生成して表示
+    """
+    if request.method == "POST" and request.FILES.get("audio"):
+        audio_file = request.FILES["audio"]
+        save_path = os.path.join(settings.MEDIA_ROOT, audio_file.name)
+        os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+        with open(save_path, "wb") as f:
+            for chunk in audio_file.chunks():
+                f.write(chunk)
+
+        # ===== librosa でピッチ解析 =====
+        y, sr = librosa.load(save_path)
+        pitches, magnitudes = librosa.piptrack(y=y, sr=sr)
+        pitch_values = [pitches[:, i].max() for i in range(pitches.shape[1])]
+
+        # ===== matplotlib でグラフ生成 =====
+        plt.figure(figsize=(12, 4))
+        plt.plot(pitch_values, color='green', linewidth=2)
+        plt.title("録音ピッチ解析")
+        plt.xlabel("時間フレーム")
+        plt.ylabel("周波数 [Hz]")
+        plt.tight_layout()
+
+        graph_path = os.path.join(settings.MEDIA_ROOT, "pitch_graph.png")
+        plt.savefig(graph_path)
+        plt.close()
+
+        return render(request, "compose/game2_result.html", {"graph_url": f"/media/pitch_graph.png"})
+
+    return render(request, "compose/game2_upload.html")

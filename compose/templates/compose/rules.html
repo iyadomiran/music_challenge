@@ -1,32 +1,48 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Pitch Master - Rules</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body class="rules">
-    <div class="rules-container">
-        <h2>🎵 Pitch Master ルール 🎵</h2>
+    <div class="rules-container" style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:1.5rem;">
+        <h2>🔻 1 - Training Mode / 難易度：⭐️⭐️ 🔻</h2>
+        <video
+            controls
+            playsinline
+            preload="metadata"
+            style="width:100%;max-width:960px;height:auto;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.35);"
+        >
+            <source src="{% static 'videos/rule.MP4' %}" type="video/mp4">
+            お使いのブラウザは動画に対応していません。<a href="{% static 'videos/rule.MP4' %}">動画をダウンロード</a>
+        </video>
 
-        <p>このゲームは、音を聴いて正しい音を選ぶ、相対音感トレーニングゲームです。</p>
+        <div style="text-align:center;width:100%;">
+            <a href="{% url 'game' %}?sound=training" class="btn" id="training-btn" style="display:inline-block;padding:0.6rem 1.2rem;border-radius:6px;text-decoration:none;">
+                Training Mode の ゲームへ
+            </a>
+        </div>
 
-        <h3>遊び方</h3>
-        <ol>
-            <li>レベル（初級・中級・上級）を選びます。</li>
-            <li>🎹スタート🎹 を押すと「ド（基準音）」が鳴ります。</li>
-            <li>数秒後、問題の音が順番に流れます。</li>
-            <li>基準音をもとに問題の音との距離を判断し、順にボタンで答えます。</li>
-            <li>間違えたら、最初の音から回答をやり直します。</li>
-            <li>🎧ヒント🎧 ボタンで、問題の音を最大5回まで聞き直せます。</li>
-            <li>5回以内に正解できればクリア！</li>
-        </ol>
+        <h2>🔻 2 - Stage Mode / 難易度：⭐️⭐️⭐️⭐️⭐️ 🔻</h2>
 
-        <h3>得点</h3>
-        <p>残り再生回数が多いほど高得点になります。</p>
+        <video
+            controls
+            playsinline
+            preload="metadata"
+            style="width:100%;max-width:960px;height:auto;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.35);"
+        >
+            <source src="{% static 'videos/game2.MP4' %}" type="video/mp4">
+            お使いのブラウザは動画に対応していません。<a href="{% static 'videos/game2.MP4' %}">動画をダウンロード</a>
+        </video>
 
-        <a href="{% url 'game' %}" class="btn">ゲームへ</a>
+        <div style="text-align:center;width:100%;">
+            <a href="{% url 'game2' %}?sound=stage" class="btn" id="stage-btn" style="display:inline-block;padding:0.6rem 1.2rem;border-radius:6px;text-decoration:none;">
+                Stage Mode の ゲームへ
+            </a>
+        </div>
     </div>
 </body>
 </html>

@@ -1,0 +1,247 @@
+/* ===============================
+   全体スタイル
+================================ */
+body {
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom, #0f0c12, #1f1a28);
+    background-image: url('/static/images/game2-back.jpg');
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: cover;
+    color: #f8f8f8;
+    overflow-x: hidden;
+}
+
+body.game h2 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 3rem;
+    text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.9);
+    margin-bottom: 0px;
+    margin-top: 20px;
+    background: linear-gradient(135deg, #FFD700,#FFEA70,#FFC300,#FFB700,#E6A800);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===============================
+   上部：ステージ全体枠
+================================ */
+#stage {
+    padding: 30px 0;
+    margin: 20px auto;
+    max-width: 1000px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #E7AA51, #FFE499, #8D5A1B, #E7AA51, #AC7031);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    text-align: center;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.7);
+}
+
+/* ===============================
+   ステージ画像
+================================ */
+#stageImage {
+    width: 90%;
+    max-width: 1000px;
+    height: auto;
+    display: block;
+    margin: 0 auto 20px auto;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#stageImage:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 25px rgba(255,255,255,0.3);
+}
+
+/* ===============================
+   問題テキスト
+================================ */
+#question {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff000;
+    margin: 20px auto;
+    text-shadow:
+        0 0 7px #000000,
+        0 0 9px #000000;
+    max-width: 750px;
+    line-height: 1.5;
+
+    /* h2グラデーションの影響をリセット */
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: initial !important;
+}
+
+/* ===============================
+   メロディーボタン
+================================ */
+#playMelody {
+    padding: 14px 28px;
+    font-size: 20px;      /* #choices button と同じサイズ */
+    font-weight: 700;     /* #choices button と同じ太さ */
+    margin: 15px 0 25px 0;
+    cursor: pointer;
+    background: linear-gradient(145deg, #ff1e1e, #800020);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    text-shadow:
+        0 0 3px #000,
+        0 0 3px #000,
+        0 0 3px #000,
+        0 0 3px #000; /* 黒の文字影を追加 */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.6), inset 0 -2px 0 rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+}
+
+#playMelody:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 18px rgba(255, 80, 80, 0.9);
+}
+
+/* ===============================
+   下記3つの選択肢〜 の説明文
+================================ */
+#choiceGuide {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffff00;
+    text-shadow:
+        0 0 7px #000000,
+        0 0 9px #000000;
+    margin-bottom: 15px;
+}
+
+/* ===============================
+   選択肢ボタン
+================================ */
+#choices button {
+    display: inline-block;
+    margin: 10px 15px;
+    padding: 12px 28px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(145deg, #6495ed, #191970, #4682b4);
+    color: #ffffff !important; /* 文字色を白に */
+    border: none;
+    border-radius: 25px;
+    text-shadow:
+        0 0 3px #000,
+        0 0 3px #000,
+        0 0 3px #000,
+        0 0 3px #000; /* 黒の文字縁を追加 */
+    letter-spacing: 1.5px;
+    box-shadow:
+        0 0 20px rgb(0, 0, 0),
+        0 8px 25px rgba(0, 0, 0, 0.8);
+    transition: all 0.3s ease;
+    opacity: 1 !important;
+}
+
+#choices button:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow:
+        0 0 15px #6495ed,
+        0 0 25px rgba(100, 149, 237, 0.8),
+        0 8px 25px rgba(0, 0, 0, 0.8);
+}
+
+#choices button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===============================
+   正誤表示
+================================ */
+#result {
+    margin-top: 25px;
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff8dc;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.8);
+}
+/* ===============================
+   再度チャレンジボタン
+================================ */
+#retry {
+    display: none;
+    padding: 12px 28px;
+    font-size: 20px;      /* #choices button と同じサイズ */
+    font-weight: 700;     /* #choices button と同じ太さ */
+    margin-top: 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #006400, #008000, #228b22);
+    color: #ffffff;
+    text-shadow:
+        0 0 3px #000,
+        0 0 3px #000,
+        0 0 3px #000,
+        0 0 3px #000;  /* 黒の文字影を追加 */
+    box-shadow:
+        0 0 15px rgb(0,0,0),
+        0 8px 25px rgba(0,0,0,0.8); /* 黒のボックスシャドウ */
+    transition: all 0.3s ease;
+}
+
+#retry:hover {
+    transform: scale(1.05);
+    box-shadow:
+        0 0 20px rgb(0,0,0),
+        0 8px 25px rgba(0,0,0,0.8);
+}
+/* ===============================
+   下部ナビ
+================================ */
+#nav {
+    margin-top: 60px;
+    padding: 20px 0;
+    background: linear-gradient(135deg,
+        #1c0038,  /* 濃い紫ベース */
+        #550058,  /* 濃いピンク */
+        #aa007f,  /* 明るめピンク */
+        #ff66aa,  /* 薄めピンク */
+        #1b1b70,  /* 濃い青 */
+        #2c2c8f,  /* 青系グラデーション */
+        #b8860b,  /* ゴールドアクセント */
+        #8b0000,  /* 暗めの赤 */
+        #ff4500,  /* 暗オレンジ */
+        #556b2f,  /* 黄緑少量 */
+        #bdb76b,  /* 暗めの黄 */
+        #4b0082   /* 深紫で締め */
+    );
+    border-top: 2px solid #000;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 0 30px rgba(0,0,0,0.05);
+    border-radius: 12px;
+}
+
+#nav a {
+    margin: 0 20px;
+    text-decoration: none;
+    color: #ffffff;  /* 落ち着いたゴールド */
+    font-weight: 700;
+    font-size: 16px;
+    text-shadow:
+        1px 1px 2px #000,  /* 黒影で文字を浮かせる */
+        0 0 6px #8b6508;    /* ゴールドで光沢感 */
+    transition: all 0.3s ease;
+}
+
+#nav a:hover {
+    color: #ffffff; /* 光沢強めゴールド */
+    text-shadow:
+        1px 1px 2px #03ff2d,
+        0 0 8px #b8860b,
+        0 0 12px #8b6508;
+    transform: scale(1.05);
+}

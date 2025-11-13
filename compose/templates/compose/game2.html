@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ステージモード</title>
+<link rel="stylesheet" href="{% static 'css/game2.css' %}">
+</head>
+<body class="game">
+<h2>🤍  ----------------  Stage Mode ----------------  🤍</h2>
+<div id="stage">
+    <!-- ステージ画像（正誤で切り替わる） -->
+    <img id="stageImage" src="{% static 'images/game2-tujyou.png' %}" alt="ステージ画像">
+
+    <!-- 問題テキスト -->
+    <h2 id="question">問題を読み込み中...</h2>
+
+    <!-- メロディー再生ボタン -->
+    <button id="playMelody">問題のメロディーを聴く</button>
+
+    <!-- 選択肢案内文 -->
+    <p id="choiceGuide">回答：下記３つの選択肢から正しいものを選ぼう！</p>
+
+    <!-- 選択肢ボタンエリア -->
+    <div id="choices"></div>
+
+    <!-- 正誤結果 -->
+    <p id="result" style="font-size:1.3em; margin-top:20px;"></p>
+
+    <!-- 再チャレンジボタン -->
+    <button id="retry">再度問題にチャレンジする</button>
+</div>
+
+<!-- 下部ナビゲーション -->
+<div id="nav">
+    {% if user.is_authenticated and not user.username == "guest" %}
+        <a href="{% url 'mypage' %}">マイページ</a>
+    {% endif %}
+    <a href="{% url 'rules' %}">ルール確認</a>
+    <a href="{% url 'logout_view' %}">ログアウト</a>
+</div>
+
+<script>
+// ===== メロディーと問題データ =====
+const quizData = {
+    "{% static 'sounds/game2-1.mp3' %}": [
+        { q: "最初の音と最後の音は何度の差があるでしょう。", options: ["1度の差", "5度の差", "0度の差"], answer: "0度の差" },
+        { q: "最初から4番目の音と最後の音は何度の差があるでしょう。", options: ["3度の差", "7度の差", "4度の差"], answer: "4度の差" },
+        { q: "最初から5番目の音と最初から8番目の音は何度の差があるでしょう。", options: ["5度の差", "4度の差", "3度の差"], answer: "4度の差" }
+    ],
+    "{% static 'sounds/game2-2.mp3' %}": [
+        { q: "最初の音と最初から３番目の音は何度の差があるでしょう。", options: ["1度の差", "5度の差", "0度の差"], answer: "5度の差" },
+        { q: "最初から2番目の音と最後の音は何度の差があるでしょう。", options: ["3度の差", "7度の差", "4度の差"], answer: "3度の差" },
+        { q: "最初から3番目の音と最初から6番目の音は何度の差があるでしょう。", options: ["2度の差", "4度の差", "3度の差"], answer: "2度の差" }
+    ],
+    "{% static 'sounds/game2-3.mp3' %}": [
+        { q: "最初の音と最初からの2番目の音は何度の差があるでしょう。", options: ["1度の差", "5度の差", "3度の差"], answer: "3度の差" },
+        { q: "最初から2番目の音と最後の音は何度の差があるでしょう。", options: ["3度の差", "5度の差", "4度の差"], answer: "5度の差" },
+        { q: "最初の音と最後の音は何度の差があるでしょう。", options: ["5度の差", "4度の差", "3度の差"], answer: "3度の差" }
+    ],
+    "{% static 'sounds/game2-4.mp3' %}": [
+        { q: "最初の音と最後の音は何度の差があるでしょう。", options: ["1度の差", "5度の差", "0度の差"], answer: "0度の差" },
+        { q: "最初から2番目の音と最後の音は何度の差があるでしょう。", options: ["3度の差", "2度の差", "4度の差"], answer: "2度の差" },
+        { q: "最初の音と最初から4番目の音は何度の差があるでしょう。", options: ["5度の差", "4度の差", "3度の差"], answer: "5度の差" }
+    ],
+    "{% static 'sounds/game2-5.mp3' %}": [
+        { q: "最初の音と最後の音は何度の差があるでしょう。", options: ["6度の差", "4度の差", "0度の差"], answer: "6度の差" },
+        { q: "最初から2番目の音と最初から6番目の音は何度の差があるでしょう。", options: ["3度の差", "2度の差", "4度の差"], answer: "2度の差" },
+        { q: "最初の音と最初から3番目の音は何度の差があるでしょう。", options: ["5度の差", "4度の差", "3度の差"], answer: "3度の差" }
+    ],
+    "{% static 'sounds/game2-6.mp3' %}": [
+        { q: "最初の音と最後の音は何度の差があるでしょう。", options: ["1度の差", "5度の差", "0度の差"], answer: "0度の差" },
+        { q: "最初から3番目の音と最後の音は何度の差があるでしょう。", options: ["3度の差", "7度の差", "2度の差"], answer: "2度の差" },
+        { q: "最初の音と最初から3番目の音は何度の差があるでしょう。", options: ["5度の差", "4度の差", "3度の差"], answer: "3度の差" }
+    ],
+    "{% static 'sounds/game2-7.mp3' %}": [
+        { q: "最初の音と最後の音は何度の差があるでしょう。", options: ["6度の差", "8度の差", "7度の差"], answer: "8度の差" },
+        { q: "最初から4番目の音と最後の音は何度の差があるでしょう。", options: ["3度の差", "7度の差", "6度の差"], answer: "6度の差" },
+        { q: "最初の音と最初から5番目の音は何度の差があるでしょう。", options: ["5度の差", "2度の差", "3度の差"], answer: "2度の差" }
+    ]
+};
+
+let selectedMelody;
+let selectedQuiz;
+
+// ===== ゲーム初期化関数 =====
+function initQuiz() {
+    const melodies = Object.keys(quizData);
+    selectedMelody = melodies[Math.floor(Math.random() * melodies.length)];
+    selectedQuiz = quizData[selectedMelody][Math.floor(Math.random() * 3)];
+
+    // 問題テキスト
+    document.getElementById("question").textContent = "問題 : " + selectedQuiz.q;
+
+    // 選択肢ボタン
+    const choicesDiv = document.getElementById("choices");
+    choicesDiv.innerHTML = ""; // 既存ボタンクリア
+    selectedQuiz.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.style.margin = "10px";
+        btn.style.backgroundColor = "#E7AA51";
+        btn.style.color = "#ff2a2a";
+        btn.style.border = "none";
+        btn.style.borderRadius = "25px";
+        btn.style.padding = "12px 28px";
+        btn.style.fontSize = "20px";
+        btn.style.fontWeight = "700";
+        btn.style.cursor = "pointer";
+        btn.onclick = () => checkAnswer(opt);
+        choicesDiv.appendChild(btn);
+    });
+
+    // 正誤結果クリア
+    document.getElementById("result").textContent = "";
+
+    // 再チャレンジボタン非表示
+    document.getElementById("retry").style.display = "none";
+
+    // 画像を通常に戻す
+    document.getElementById("stageImage").src = "{% static 'images/game2-tujyou.png' %}";
+}
+
+// メロディー再生
+const melodyAudio = new Audio();
+document.getElementById("playMelody").onclick = () => {
+    melodyAudio.src = selectedMelody;
+    melodyAudio.currentTime = 0;
+    melodyAudio.play();
+};
+
+// 正誤判定
+function checkAnswer(selected) {
+    const resultEl = document.getElementById("result");
+    const stageImage = document.getElementById("stageImage");
+
+    if (selected === selectedQuiz.answer) {
+        resultEl.textContent = `正解！答えは ${selectedQuiz.answer} でした！`;
+        resultEl.style.color = "#fff8dc";
+        stageImage.src = "{% static 'images/game2-seikai.png' %}";
+
+        // 🔊 正解音を再生
+        const correctSound = new Audio("{% static 'sounds/seikai.mp3' %}");
+        correctSound.play();
+    } else {
+        resultEl.textContent = `不正解！答えは ${selectedQuiz.answer} でした。`;
+        resultEl.style.color = "#fff8dc";
+        stageImage.src = "{% static 'images/game2-huseikai.png' %}";
+
+        // 🔊 不正解音を再生
+        const wrongSound = new Audio("{% static 'sounds/oshii.mp3' %}");
+        wrongSound.play();
+    }
+
+    // ボタン無効化
+    document.querySelectorAll("#choices button").forEach(b => b.disabled = true);
+
+    // 再チャレンジボタン表示
+    document.getElementById("retry").style.display = "inline-block";
+}
+
+// 再チャレンジボタン
+document.getElementById("retry").onclick = () => {
+    initQuiz();
+};
+
+// 初回起動
+initQuiz();
+</script>
+
+</body>
+</html>
+
+<!-- 音源を事前に読み込み -->
+<audio id="training-audio" src="{% static 'sounds/training_mode.mp3' %}"></audio>
+<audio id="stage-audio" src="{% static 'sounds/stage_mode.mp3' %}"></audio>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const params = new URLSearchParams(window.location.search);
+    const sound = params.get("sound");
+
+    if (sound === "training") {
+        const audio = document.getElementById("training-audio");
+        audio.play().catch(err => console.log("音声再生エラー:", err));
+    } else if (sound === "stage") {
+        const audio = document.getElementById("stage-audio");
+        audio.play().catch(err => console.log("音声再生エラー:", err));
+    }
+});
+</script>
+
+<script>
+window.addEventListener("load", function() {
+    const params = new URLSearchParams(window.location.search);
+    const play = params.get("play");
+    if (play === "training_mode") {
+        new Audio("{% static 'sounds/training_mode.mp3' %}").play();
+    } else if (play === "stage_mode") {
+        new Audio("{% static 'sounds/stage_mode.mp3' %}").play();
+    }
+});
+</script>

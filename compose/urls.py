@@ -1,15 +1,33 @@
-from django.urls import path  # URLパターンを定義するモジュールを読み込む
-from . import views          # 同じアプリ内の views.py を読み込む
+from django.urls import path
+from . import views
 
-# このアプリ内のURLパターンを定義
+# app_name intentionally omitted so template {% url 'register' %} etc. resolve as global names
+
 urlpatterns = [
-    path('', views.top_view, name='top'),                     # トップページ
-    path('register/', views.register_view, name='register'),  # 新規登録ページ
-    path('login/', views.login_view, name='login'),           # ログインページ
-    path('guest/', views.guest_play_view, name='guest_play'), # ゲストプレイページ
-    path('rules/', views.rules, name='rules'),               # ルールページ
-    path('game/', views.compose_view, name='game'),          # ゲーム画面
-    path('logout/', views.logout_view, name='logout_view'),  # ログアウト処理
-    path('mypage/', views.mypage_view, name='mypage'),       # マイページ
-    path('save_score/', views.save_score, name='save_score'),# スコア保存用API
+    path('', views.top, name='top'),
+    path('rules/', views.rules, name='rules'),
+
+    # ゲームページ
+    path('game/', views.game, name='game'),
+    path('game2/', views.game2, name='game2'),
+
+    # ユーザー認証
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout_view'),
+    path('register/', views.register, name='register'),
+
+    # ゲストプレイ
+    path('guest/', views.guest_play, name='guest_play'),
+
+    # チャレンジ保存
+    path('save_challenge/', views.save_challenge, name='save_challenge'),
+
+    # マイページ
+    path('mypage/', views.mypage, name='mypage'),
+
+    # 録音アップロード
+    path('upload_audio/', views.upload_audio, name='upload_audio'),
+
+    # 新規：ピッチ解析（サーバー側で画像生成）
+    path('analyze_pitch/', views.analyze_pitch, name='analyze_pitch'),
 ]
